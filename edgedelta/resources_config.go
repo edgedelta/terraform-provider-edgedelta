@@ -40,6 +40,12 @@ func resourceConfig() *schema.Resource {
 				Default:     false,
 				Description: "Debug flag",
 			},
+			"api_endpoint": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "https://api.edgedelta.com",
+				Description: "API base URL",
+			},
 		},
 	}
 }
