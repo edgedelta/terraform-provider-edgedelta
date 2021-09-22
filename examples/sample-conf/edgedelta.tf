@@ -8,8 +8,14 @@ terraform {
 }
 
 resource "edgedelta_config" "my_conf" {
+  org_id             = ""
+  path               = ""
+  debug              = true
+}
+
+resource "edgedelta_config" "my_conf_with_id" {
   conf_id            = ""
   org_id             = ""
-  config_data        = file("")
+  path               = ""
   debug              = true
 }
