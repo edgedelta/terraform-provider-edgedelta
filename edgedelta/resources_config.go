@@ -25,14 +25,10 @@ func resourceConfig() *schema.Resource {
 			},
 			"path": {
 				Type:        schema.TypeString,
-				Required:    false,
+				Required:    true,
 				Description: "Path of the config file",
 			},
-			"config_data": {
-				Type:        schema.TypeString,
-				Required:    false,
-				Description: "config data",
-			},
+			// Optional params
 			"conf_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
