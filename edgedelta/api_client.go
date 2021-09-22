@@ -28,7 +28,7 @@ func (cli *EDConfigAPIClient) initializeHTTPClient() {
 	}
 }
 
-func (cli *EDConfigAPIClient) getConfigs() (EDGetAllConfigsResponse, error) {
+func (cli *EDConfigAPIClient) getConfigs() (GetAllConfigsResponse, error) {
 	cli.initializeHTTPClient()
 
 	baseURL, err := url.Parse(fmt.Sprintf("%s/v1/orgs/%s/confs", cli.APIBaseURL, cli.OrgID))
@@ -64,7 +64,7 @@ func (cli *EDConfigAPIClient) getConfigs() (EDGetAllConfigsResponse, error) {
 		return nil, fmt.Errorf("got non OK http status from: %s, status: %v, response: %q", req.URL.RequestURI(), resp.StatusCode, string(b))
 	}
 
-	var responseData EDGetAllConfigsResponse
+	var responseData GetAllConfigsResponse
 	if err := json.Unmarshal(b, &responseData); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal the response body: %s", err)
 	}
@@ -72,7 +72,7 @@ func (cli *EDConfigAPIClient) getConfigs() (EDGetAllConfigsResponse, error) {
 	return responseData, nil
 }
 
-func (cli *EDConfigAPIClient) getConfigWithID(configID string) (*EDGetConfigResponse, error) {
+func (cli *EDConfigAPIClient) getConfigWithID(configID string) (*GetConfigResponse, error) {
 	cli.initializeHTTPClient()
 
 	baseURL, err := url.Parse(fmt.Sprintf("%s/v1/orgs/%s/confs/%s", cli.APIBaseURL, cli.OrgID, configID))
@@ -103,7 +103,7 @@ func (cli *EDConfigAPIClient) getConfigWithID(configID string) (*EDGetConfigResp
 		return nil, fmt.Errorf("got non OK http status from: %s, status: %v, response: %q", req.URL.RequestURI(), resp.StatusCode, string(b))
 	}
 
-	var responseData EDGetConfigResponse
+	var responseData GetConfigResponse
 	if err := json.Unmarshal(b, &responseData); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal the response body: %s", err)
 	}

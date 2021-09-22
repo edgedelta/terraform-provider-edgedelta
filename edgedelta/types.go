@@ -1,6 +1,6 @@
 package edgedelta
 
-type EDConfig struct {
+type Config struct {
 	Content     string `json:"content"`
 	Description string `json:"description"`
 	ID          string `json:"id"`
@@ -8,6 +8,6 @@ type EDConfig struct {
 	Tag         string `json:"tag"`
 }
 
-type EDGetAllConfigsResponse []EDConfig
-type EDGetConfigResponse EDConfig
-type EDCreateConfigRequest EDConfig
+type GetAllConfigsResponse []Config
+type GetConfigResponse Config
+type CreateConfigRequest Config
