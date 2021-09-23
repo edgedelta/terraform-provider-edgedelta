@@ -78,3 +78,42 @@ func TestUpdateConfigWithID(t *testing.T) {
 
 	t.Logf("%v", confObject)
 }
+
+func TestCreateConfigWithID(t *testing.T) {
+	if *orgID == "" {
+		t.Error("org_id is not specified")
+		return
+	}
+	if *confPath == "" {
+		t.Error("conf_path is not specified")
+		return
+	}
+	if *apiKey == "" {
+		t.Error("api_key is not specified")
+		return
+	}
+
+	cli := ConfigAPIClient{
+		OrgID:      *orgID,
+		APIBaseURL: "https://api.staging.edgedelta.com",
+		apiKey:     *apiKey,
+	}
+
+	confDataRaw, err := os.ReadFile(*confPath)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	confData := Config{
+		Content: string(confDataRaw[:]),
+	}
+
+	confObject, err := cli.createConfig(confData)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	t.Logf("%v", confObject)
+}
