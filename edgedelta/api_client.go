@@ -9,14 +9,14 @@ import (
 	"time"
 )
 
-type EDConfigAPIClient struct {
+type ConfigAPIClient struct {
 	OrgID      string
 	APIBaseURL string
 	apiKey     string
 	cl         *http.Client
 }
 
-func (cli *EDConfigAPIClient) initializeHTTPClient() {
+func (cli *ConfigAPIClient) initializeHTTPClient() {
 	t := http.DefaultTransport.(*http.Transport).Clone()
 	t.MaxIdleConns = 1
 	t.MaxConnsPerHost = 1
@@ -28,7 +28,7 @@ func (cli *EDConfigAPIClient) initializeHTTPClient() {
 	}
 }
 
-func (cli *EDConfigAPIClient) getConfigWithID(configID string) (*GetConfigResponse, error) {
+func (cli *ConfigAPIClient) getConfigWithID(configID string) (*GetConfigResponse, error) {
 	cli.initializeHTTPClient()
 
 	baseURL, err := url.Parse(fmt.Sprintf("%s/v1/orgs/%s/confs/%s", cli.APIBaseURL, cli.OrgID, configID))
