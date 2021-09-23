@@ -8,7 +8,6 @@ type Config struct {
 	Tag         string `json:"tag"`
 }
 
-type GetAllConfigsResponse []Config
 type GetConfigResponse Config
 type UpdateConfigResponse Config
-type CreateConfigRequest Config
+type CreateConfigResponse Config
