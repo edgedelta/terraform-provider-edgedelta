@@ -7,10 +7,11 @@ import (
 )
 
 var (
-	apiKey   = flag.String("api_key", "", "API auth key")
-	confID   = flag.String("conf_id", "", "Unique configuration ID")
-	orgID    = flag.String("org_id", "", "Unique organization ID")
-	confPath = flag.String("conf_path", "", "Path to the new config file")
+	apiKey      = flag.String("api_key", "", "API auth key")
+	apiEndpoint = flag.String("api_endpoint", "", "API endpoint")
+	confID      = flag.String("conf_id", "", "Unique configuration ID")
+	orgID       = flag.String("org_id", "", "Unique organization ID")
+	confPath    = flag.String("conf_path", "", "Path to the new config file")
 )
 
 func TestGetConfigWithID(t *testing.T) {
@@ -26,11 +27,15 @@ func TestGetConfigWithID(t *testing.T) {
 		t.Error("conf_id is not specified")
 		return
 	}
+	if *apiEndpoint == "" {
+		t.Error("api_endpoint is not specified")
+		return
+	}
 
 	cli := ConfigAPIClient{
 		OrgID:      *orgID,
 		apiKey:     *apiKey,
-		APIBaseURL: "https://api.staging.edgedelta.com",
+		APIBaseURL: *apiEndpoint,
 	}
 
 	confObject, err := cli.getConfigWithID(*confID)
@@ -54,10 +59,14 @@ func TestUpdateConfigWithID(t *testing.T) {
 		t.Error("conf_path is not specified")
 		return
 	}
+	if *apiEndpoint == "" {
+		t.Error("api_endpoint is not specified")
+		return
+	}
 
 	cli := ConfigAPIClient{
 		OrgID:      *orgID,
-		APIBaseURL: "https://api.staging.edgedelta.com",
+		APIBaseURL: *apiEndpoint,
 	}
 
 	confDataRaw, err := os.ReadFile(*confPath)
@@ -92,10 +101,14 @@ func TestCreateConfigWithID(t *testing.T) {
 		t.Error("api_key is not specified")
 		return
 	}
+	if *apiEndpoint == "" {
+		t.Error("api_endpoint is not specified")
+		return
+	}
 
 	cli := ConfigAPIClient{
 		OrgID:      *orgID,
-		APIBaseURL: "https://api.staging.edgedelta.com",
+		APIBaseURL: *apiEndpoint,
 		apiKey:     *apiKey,
 	}
 
