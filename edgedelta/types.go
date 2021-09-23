@@ -10,4 +10,5 @@ type Config struct {
 
 type GetAllConfigsResponse []Config
 type GetConfigResponse Config
+type UpdateConfigResponse Config
 type CreateConfigRequest Config
