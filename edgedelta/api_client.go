@@ -34,12 +34,12 @@ func (cli *ConfigAPIClient) getConfigWithID(configID string) (*GetConfigResponse
 
 	baseURL, err := url.Parse(fmt.Sprintf("%s/v1/orgs/%s/confs/%s", cli.APIBaseURL, cli.OrgID, configID))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("url parsing error: %v (base url was '%s')", err, cli.APIBaseURL)
 	}
 
 	req, err := http.NewRequest(http.MethodGet, baseURL.String(), nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("http request wrapper error: %v (base url was '%s')", err, cli.APIBaseURL)
 	}
 
 	req.Header.Add("Content-Type", "application/json")
@@ -73,7 +73,7 @@ func (cli *ConfigAPIClient) createConfig(configObject Config) (*CreateConfigResp
 
 	baseURL, err := url.Parse(fmt.Sprintf("%s/v1/orgs/%s/confs", cli.APIBaseURL, cli.OrgID))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("url parsing error: %v (base url was '%s')", err, cli.APIBaseURL)
 	}
 
 	jsonData, err := json.Marshal(configObject)
@@ -83,7 +83,7 @@ func (cli *ConfigAPIClient) createConfig(configObject Config) (*CreateConfigResp
 
 	req, err := http.NewRequest(http.MethodPost, baseURL.String(), bytes.NewBuffer(jsonData))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("http request wrapper error: %v (base url was '%s')", err, cli.APIBaseURL)
 	}
 
 	req.Header.Add("Content-Type", "application/json")
@@ -117,7 +117,7 @@ func (cli *ConfigAPIClient) updateConfigWithID(configID string, configObject Con
 
 	baseURL, err := url.Parse(fmt.Sprintf("%s/v1/orgs/%s/confs/%s", cli.APIBaseURL, cli.OrgID, configID))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("url parsing error: %v (base url was '%s')", err, cli.APIBaseURL)
 	}
 
 	jsonData, err := json.Marshal(configObject)
@@ -127,7 +127,7 @@ func (cli *ConfigAPIClient) updateConfigWithID(configID string, configObject Con
 
 	req, err := http.NewRequest(http.MethodPut, baseURL.String(), bytes.NewBuffer(jsonData))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("http request wrapper error: %v (base url was '%s')", err, cli.APIBaseURL)
 	}
 
 	req.Header.Add("Content-Type", "application/json")
