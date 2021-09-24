@@ -28,17 +28,17 @@ func resourceConfig() *schema.Resource {
 				Required:    true,
 				Description: "API base URL",
 			},
+			"config_content": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Configuration file data",
+			},
 			// Optional params
 			"api_endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "https://api.edgedelta.com",
 				Description: "API base URL",
-			},
-			"conf_data": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Configuration file data",
 			},
 			"conf_id": {
 				Type:        schema.TypeString,
@@ -51,22 +51,16 @@ func resourceConfig() *schema.Resource {
 				Default:     false,
 				Description: "Debug flag",
 			},
-			"path": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Path of the config file",
-			},
 		},
 	}
 }
 
-func parseArgs(d *schema.ResourceData) (orgID string, confID string, path string, apiEndpoint string, apiKey string, confData string, diags diag.Diagnostics) {
+func parseArgs(d *schema.ResourceData) (orgID string, confID string, apiEndpoint string, apiKey string, confData string, diags diag.Diagnostics) {
 	orgIDRaw := d.Get("org_id")
-	pathRaw := d.Get("path")
 	confIDRaw := d.Get("conf_id")
 	apiEndpointRaw := d.Get("api_endpoint")
 	apiKeyRaw := d.Get("api_key_envvar")
-	configDataRaw := d.Get("conf_data")
+	configDataRaw := d.Get("config_content")
 
 	if orgIDRaw == nil {
 		diags = append(diags, diag.Diagnostic{
@@ -83,14 +77,6 @@ func parseArgs(d *schema.ResourceData) (orgID string, confID string, path string
 		})
 	} else {
 		confID = confIDRaw.(string)
-	}
-	if pathRaw == nil {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "path is nil",
-		})
-	} else {
-		path = pathRaw.(string)
 	}
 	if apiEndpointRaw == nil {
 		diags = append(diags, diag.Diagnostic{
@@ -121,39 +107,19 @@ func parseArgs(d *schema.ResourceData) (orgID string, confID string, path string
 }
 
 func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	orgID, confID, path, apiEndpoint, apiKey, confData, diags := parseArgs(d)
-
+	orgID, confID, apiEndpoint, apiKey, confData, diags := parseArgs(d)
 	if len(diags) > 0 {
 		return diags
 	}
-
 	var confDataObj Config
-	if path != "" {
-		confDataRaw, err := os.ReadFile(path)
-		if err != nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Could not read the specified configuration file",
-				Detail:   fmt.Sprintf("%s", err),
-			})
-			return diags
-		}
-
-		confDataObj = Config{
-			Content: string(confDataRaw[:]),
-		}
-	} else {
-		confDataObj = Config{
-			Content: confData,
-		}
+	confDataObj = Config{
+		Content: confData,
 	}
-
 	apiClient := ConfigAPIClient{
 		OrgID:      orgID,
 		APIBaseURL: apiEndpoint,
 		apiKey:     apiKey,
 	}
-
 	if confID == "" {
 		// Create a new config
 		apiResp, err := apiClient.createConfig(confDataObj)
@@ -165,7 +131,6 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 			})
 			return diags
 		}
-
 		d.SetId(apiResp.ID)
 		d.Set("conf_id", apiResp.ID)
 		d.Set("org_id", apiResp.OrgID)
@@ -180,7 +145,6 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 			})
 			return diags
 		}
-
 		d.SetId(apiResp.ID)
 		d.Set("conf_id", apiResp.ID)
 		d.Set("org_id", apiResp.OrgID)
@@ -190,18 +154,15 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 }
 
 func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	orgID, confID, _, apiEndpoint, apiKey, _, diags := parseArgs(d)
-
+	orgID, confID, apiEndpoint, apiKey, _, diags := parseArgs(d)
 	if len(diags) > 0 {
 		return diags
 	}
-
 	apiClient := ConfigAPIClient{
 		OrgID:      orgID,
 		APIBaseURL: apiEndpoint,
 		apiKey:     apiKey,
 	}
-
 	apiResp, err := apiClient.getConfigWithID(confID)
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
@@ -211,7 +172,6 @@ func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface
 		})
 		return diags
 	}
-
 	d.SetId(apiResp.ID)
 	d.Set("conf_id", apiResp.ID)
 	d.Set("org_id", apiResp.OrgID)
@@ -220,45 +180,24 @@ func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface
 }
 
 func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	orgID, confID, path, apiEndpoint, apiKey, confData, diags := parseArgs(d)
-
+	orgID, confID, apiEndpoint, apiKey, confData, diags := parseArgs(d)
 	if len(diags) > 0 {
 		return diags
 	}
-
 	if confID == "" {
 		// Just get the config id from the tf state
 		d.Set("conf_id", d.Id())
 		confID = d.Id()
 	}
-
 	var confDataObj Config
-	if path != "" {
-		confDataRaw, err := os.ReadFile(path)
-		if err != nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  "Could not read the specified configuration file",
-				Detail:   fmt.Sprintf("%s", err),
-			})
-			return diags
-		}
-
-		confDataObj = Config{
-			Content: string(confDataRaw[:]),
-		}
-	} else {
-		confDataObj = Config{
-			Content: confData,
-		}
+	confDataObj = Config{
+		Content: confData,
 	}
-
 	apiClient := ConfigAPIClient{
 		OrgID:      orgID,
 		APIBaseURL: apiEndpoint,
 		apiKey:     apiKey,
 	}
-
 	_, err := apiClient.updateConfigWithID(confID, confDataObj)
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
