@@ -34,7 +34,7 @@ func TestGetConfigWithID(t *testing.T) {
 
 	cli := ConfigAPIClient{
 		OrgID:      *orgID,
-		apiKey:     *apiKey,
+		apiSecret:  *apiKey,
 		APIBaseURL: *apiEndpoint,
 	}
 
@@ -109,7 +109,7 @@ func TestCreateConfigWithID(t *testing.T) {
 	cli := ConfigAPIClient{
 		OrgID:      *orgID,
 		APIBaseURL: *apiEndpoint,
-		apiKey:     *apiKey,
+		apiSecret:  *apiKey,
 	}
 
 	confDataRaw, err := os.ReadFile(*confPath)

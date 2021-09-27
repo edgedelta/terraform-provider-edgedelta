@@ -13,7 +13,7 @@ import (
 type ConfigAPIClient struct {
 	OrgID      string
 	APIBaseURL string
-	apiKey     string
+	apiSecret  string
 	cl         *http.Client
 }
 
@@ -43,7 +43,7 @@ func (cli *ConfigAPIClient) getConfigWithID(configID string) (*GetConfigResponse
 	}
 
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", cli.apiKey)
+	req.Header.Add("X-ED-API-Token", cli.apiSecret)
 
 	resp, err := cli.cl.Do(req)
 	if err != nil {
@@ -87,7 +87,7 @@ func (cli *ConfigAPIClient) createConfig(configObject Config) (*CreateConfigResp
 	}
 
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", cli.apiKey)
+	req.Header.Add("X-ED-API-Token", cli.apiSecret)
 
 	resp, err := cli.cl.Do(req)
 	if err != nil {
@@ -131,7 +131,7 @@ func (cli *ConfigAPIClient) updateConfigWithID(configID string, configObject Con
 	}
 
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("X-ED-Config-Id", configID)
+	req.Header.Add("X-ED-API-Token", cli.apiSecret)
 
 	resp, err := cli.cl.Do(req)
 	if err != nil {
