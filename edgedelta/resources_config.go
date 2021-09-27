@@ -3,7 +3,6 @@ package edgedelta
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -23,10 +22,10 @@ func resourceConfig() *schema.Resource {
 				Required:    true,
 				Description: "Unique organization ID",
 			},
-			"api_key_envvar": {
+			"api_secret": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "API base URL",
+				Description: "API secret",
 			},
 			"config_content": {
 				Type:        schema.TypeString,
@@ -55,11 +54,11 @@ func resourceConfig() *schema.Resource {
 	}
 }
 
-func parseArgs(d *schema.ResourceData) (orgID string, confID string, apiEndpoint string, apiKey string, confData string, diags diag.Diagnostics) {
+func parseArgs(d *schema.ResourceData) (orgID string, confID string, apiEndpoint string, apiSecret string, confData string, diags diag.Diagnostics) {
 	orgIDRaw := d.Get("org_id")
 	confIDRaw := d.Get("conf_id")
 	apiEndpointRaw := d.Get("api_endpoint")
-	apiKeyRaw := d.Get("api_key_envvar")
+	apiSecretRaw := d.Get("api_secret")
 	configDataRaw := d.Get("config_content")
 
 	if orgIDRaw == nil {
@@ -86,13 +85,13 @@ func parseArgs(d *schema.ResourceData) (orgID string, confID string, apiEndpoint
 	} else {
 		apiEndpoint = apiEndpointRaw.(string)
 	}
-	if apiKeyRaw == nil {
+	if apiSecretRaw == nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
-			Summary:  "api_key_envvar is nil",
+			Summary:  "api_secret is nil",
 		})
 	} else {
-		apiKey = os.Getenv(apiKeyRaw.(string))
+		apiSecret = apiSecretRaw.(string)
 	}
 	if configDataRaw == nil {
 		diags = append(diags, diag.Diagnostic{
@@ -107,7 +106,7 @@ func parseArgs(d *schema.ResourceData) (orgID string, confID string, apiEndpoint
 }
 
 func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	orgID, confID, apiEndpoint, apiKey, confData, diags := parseArgs(d)
+	orgID, confID, apiEndpoint, apiSecret, confData, diags := parseArgs(d)
 	if len(diags) > 0 {
 		return diags
 	}
@@ -118,7 +117,7 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	apiClient := ConfigAPIClient{
 		OrgID:      orgID,
 		APIBaseURL: apiEndpoint,
-		apiKey:     apiKey,
+		apiSecret:  apiSecret,
 	}
 	if confID == "" {
 		// Create a new config
@@ -154,14 +153,14 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 }
 
 func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	orgID, confID, apiEndpoint, apiKey, _, diags := parseArgs(d)
+	orgID, confID, apiEndpoint, apiSecret, _, diags := parseArgs(d)
 	if len(diags) > 0 {
 		return diags
 	}
 	apiClient := ConfigAPIClient{
 		OrgID:      orgID,
 		APIBaseURL: apiEndpoint,
-		apiKey:     apiKey,
+		apiSecret:  apiSecret,
 	}
 	apiResp, err := apiClient.getConfigWithID(confID)
 	if err != nil {
@@ -180,7 +179,7 @@ func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface
 }
 
 func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	orgID, confID, apiEndpoint, apiKey, confData, diags := parseArgs(d)
+	orgID, confID, apiEndpoint, apiSecret, confData, diags := parseArgs(d)
 	if len(diags) > 0 {
 		return diags
 	}
@@ -196,7 +195,7 @@ func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	apiClient := ConfigAPIClient{
 		OrgID:      orgID,
 		APIBaseURL: apiEndpoint,
-		apiKey:     apiKey,
+		apiSecret:  apiSecret,
 	}
 	_, err := apiClient.updateConfigWithID(confID, confDataObj)
 	if err != nil {
