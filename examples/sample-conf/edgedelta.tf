@@ -7,15 +7,24 @@ terraform {
   }
 }
 
-resource "edgedelta_config" "my_conf" {
-  org_id             = ""
-  path               = ""
-  debug              = true
+
+variable "ED_API_SECRET" {
+  type = string
 }
 
-resource "edgedelta_config" "my_conf_with_id" {
+resource "edgedelta_config" "conf_without_id" {
+  org_id             = ""
+  config_content     = file("")
+  debug              = true
+  api_endpoint       = "https://api.edgedelta.com"
+  api_secret         = var.ED_API_SECRET
+}
+
+resource "edgedelta_config" "conf_with_id" {
   conf_id            = ""
   org_id             = ""
-  path               = ""
+  config_content     = file("")
   debug              = true
+  api_endpoint       = "https://api.edgedelta.com"
+  api_secret         = var.ED_API_SECRET
 }
