@@ -26,6 +26,7 @@ func resourceConfig() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "API secret",
+				Sensitive:   true,
 			},
 			"config_content": {
 				Type:        schema.TypeString,
@@ -131,7 +132,7 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 			return diags
 		}
 		d.SetId(apiResp.ID)
-		d.Set("conf_id", apiResp.ID)
+		d.Set("conf_id", confID)
 		d.Set("org_id", apiResp.OrgID)
 	} else {
 		// First run of the terraform config, just update the existing ed-config
@@ -162,7 +163,20 @@ func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface
 		APIBaseURL: apiEndpoint,
 		apiSecret:  apiSecret,
 	}
-	apiResp, err := apiClient.getConfigWithID(confID)
+	activeConfID := confID
+	if activeConfID == "" {
+		if d.Id() == "" {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Cannot determine config ID",
+				Detail:   "Possibly tried to read the resource with conf_id=nil and id=nil",
+			})
+			return diags
+		}
+
+		activeConfID = d.Id()
+	}
+	apiResp, err := apiClient.getConfigWithID(activeConfID)
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -172,7 +186,7 @@ func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface
 		return diags
 	}
 	d.SetId(apiResp.ID)
-	d.Set("conf_id", apiResp.ID)
+	d.Set("conf_id", confID)
 	d.Set("org_id", apiResp.OrgID)
 
 	return diags
@@ -185,7 +199,6 @@ func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 	if confID == "" {
 		// Just get the config id from the tf state
-		d.Set("conf_id", d.Id())
 		confID = d.Id()
 	}
 	var confDataObj Config
