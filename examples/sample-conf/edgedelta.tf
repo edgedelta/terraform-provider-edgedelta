@@ -12,19 +12,17 @@ variable "ED_API_SECRET" {
   type = string
 }
 
-resource "edgedelta_config" "conf_without_id" {
+provider "edgedelta" {
   org_id             = ""
-  config_content     = file("")
-  debug              = true
-  api_endpoint       = "https://api.edgedelta.com"
   api_secret         = var.ED_API_SECRET
+  api_endpoint       = "https://api.edgedelta.com"
+}
+
+resource "edgedelta_config" "conf_without_id" {
+  config_content     = file("")
 }
 
 resource "edgedelta_config" "conf_with_id" {
   conf_id            = ""
-  org_id             = ""
   config_content     = file("")
-  debug              = true
-  api_endpoint       = "https://api.edgedelta.com"
-  api_secret         = var.ED_API_SECRET
 }
