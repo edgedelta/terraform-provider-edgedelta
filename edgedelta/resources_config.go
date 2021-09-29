@@ -17,29 +17,12 @@ func resourceConfig() *schema.Resource {
 		DeleteContext: resourceConfigDelete,
 		Schema: map[string]*schema.Schema{
 			// Required params
-			"org_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Unique organization ID",
-			},
-			"api_secret": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "API secret",
-				Sensitive:   true,
-			},
 			"config_content": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Configuration file data",
 			},
 			// Optional params
-			"api_endpoint": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "https://api.edgedelta.com",
-				Description: "API base URL",
-			},
 			"conf_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -55,21 +38,9 @@ func resourceConfig() *schema.Resource {
 	}
 }
 
-func parseArgs(d *schema.ResourceData) (orgID string, confID string, apiEndpoint string, apiSecret string, confData string, diags diag.Diagnostics) {
-	orgIDRaw := d.Get("org_id")
+func parseArgs(d *schema.ResourceData) (confID string, confData string, diags diag.Diagnostics) {
 	confIDRaw := d.Get("conf_id")
-	apiEndpointRaw := d.Get("api_endpoint")
-	apiSecretRaw := d.Get("api_secret")
 	configDataRaw := d.Get("config_content")
-
-	if orgIDRaw == nil {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "org_id is nil",
-		})
-	} else {
-		orgID = orgIDRaw.(string)
-	}
 	if confIDRaw == nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -77,22 +48,6 @@ func parseArgs(d *schema.ResourceData) (orgID string, confID string, apiEndpoint
 		})
 	} else {
 		confID = confIDRaw.(string)
-	}
-	if apiEndpointRaw == nil {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "api_endpoint is nil",
-		})
-	} else {
-		apiEndpoint = apiEndpointRaw.(string)
-	}
-	if apiSecretRaw == nil {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "api_secret is nil",
-		})
-	} else {
-		apiSecret = apiSecretRaw.(string)
 	}
 	if configDataRaw == nil {
 		diags = append(diags, diag.Diagnostic{
@@ -102,12 +57,12 @@ func parseArgs(d *schema.ResourceData) (orgID string, confID string, apiEndpoint
 	} else {
 		confData = configDataRaw.(string)
 	}
-
 	return
 }
 
 func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	orgID, confID, apiEndpoint, apiSecret, confData, diags := parseArgs(d)
+	meta := m.(*ProviderMetadata)
+	confID, confData, diags := parseArgs(d)
 	if len(diags) > 0 {
 		return diags
 	}
@@ -115,14 +70,9 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	confDataObj = Config{
 		Content: confData,
 	}
-	apiClient := ConfigAPIClient{
-		OrgID:      orgID,
-		APIBaseURL: apiEndpoint,
-		apiSecret:  apiSecret,
-	}
 	if confID == "" {
 		// Create a new config
-		apiResp, err := apiClient.createConfig(confDataObj)
+		apiResp, err := meta.client.createConfig(confDataObj)
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
@@ -136,11 +86,11 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		d.Set("org_id", apiResp.OrgID)
 	} else {
 		// First run of the terraform config, just update the existing ed-config
-		apiResp, err := apiClient.updateConfigWithID(confID, confDataObj)
+		apiResp, err := meta.client.updateConfigWithID(confID, confDataObj)
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
-				Summary:  "Could not update the config resource",
+				Summary:  "Could not update the config resource (create=>update)",
 				Detail:   fmt.Sprintf("%s", err),
 			})
 			return diags
@@ -154,14 +104,10 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 }
 
 func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	orgID, confID, apiEndpoint, apiSecret, _, diags := parseArgs(d)
+	meta := m.(*ProviderMetadata)
+	confID, _, diags := parseArgs(d)
 	if len(diags) > 0 {
 		return diags
-	}
-	apiClient := ConfigAPIClient{
-		OrgID:      orgID,
-		APIBaseURL: apiEndpoint,
-		apiSecret:  apiSecret,
 	}
 	activeConfID := confID
 	if activeConfID == "" {
@@ -176,7 +122,7 @@ func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface
 
 		activeConfID = d.Id()
 	}
-	apiResp, err := apiClient.getConfigWithID(activeConfID)
+	apiResp, err := meta.client.getConfigWithID(activeConfID)
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -193,7 +139,8 @@ func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface
 }
 
 func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	orgID, confID, apiEndpoint, apiSecret, confData, diags := parseArgs(d)
+	meta := m.(*ProviderMetadata)
+	confID, confData, diags := parseArgs(d)
 	if len(diags) > 0 {
 		return diags
 	}
@@ -205,12 +152,7 @@ func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	confDataObj = Config{
 		Content: confData,
 	}
-	apiClient := ConfigAPIClient{
-		OrgID:      orgID,
-		APIBaseURL: apiEndpoint,
-		apiSecret:  apiSecret,
-	}
-	_, err := apiClient.updateConfigWithID(confID, confDataObj)
+	_, err := meta.client.updateConfigWithID(confID, confDataObj)
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -224,7 +166,5 @@ func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 }
 
 func resourceConfigDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
-
-	return diags
+	return diag.Diagnostics{}
 }
