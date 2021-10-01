@@ -7,13 +7,13 @@ terraform {
   }
 }
 
-variable "ED_API_SECRET" {
+variable "ED_API_TOKEN" {
   type = string
 }
 
 provider "edgedelta" {
   org_id             = "<your-organization-id>"
-  api_secret         = var.ED_API_SECRET
+  api_secret         = var.ED_API_TOKEN
 }
 
 resource "edgedelta_config" "bare_minimum" {
