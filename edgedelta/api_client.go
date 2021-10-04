@@ -76,12 +76,12 @@ func (cli *ConfigAPIClient) createConfig(configObject Config) (*CreateConfigResp
 		return nil, fmt.Errorf("url parsing error: %v (base url was '%s')", err, cli.APIBaseURL)
 	}
 
-	jsonData, err := json.Marshal(configObject)
+	d, err := json.Marshal(configObject)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal the config object: %v", err)
 	}
 
-	req, err := http.NewRequest(http.MethodPost, baseURL.String(), bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest(http.MethodPost, baseURL.String(), bytes.NewBuffer(d))
 	if err != nil {
 		return nil, fmt.Errorf("http request wrapper error: %v (base url was '%s')", err, cli.APIBaseURL)
 	}
@@ -120,12 +120,12 @@ func (cli *ConfigAPIClient) updateConfigWithID(configID string, configObject Con
 		return nil, fmt.Errorf("url parsing error: %v (base url was '%s')", err, cli.APIBaseURL)
 	}
 
-	jsonData, err := json.Marshal(configObject)
+	d, err := json.Marshal(configObject)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal the config object: %v", err)
 	}
 
-	req, err := http.NewRequest(http.MethodPut, baseURL.String(), bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest(http.MethodPut, baseURL.String(), bytes.NewBuffer(d))
 	if err != nil {
 		return nil, fmt.Errorf("http request wrapper error: %v (base url was '%s')", err, cli.APIBaseURL)
 	}
