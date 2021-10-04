@@ -1,13 +1,13 @@
 ---
 page_title: "edgedelta_config Resource - terraform-provider-edgedelta"
 subcategory: ""
-description: "The config resource allows you to manage your Edge Delta configurations"
+description: "The edgedelta_config resource allows you to manage your Edge Delta configurations"
   
 ---
 
 # edgedelta_config (Resource)
 
-The `config` resource allows you to manage your Edge Delta configurations
+The `edgedelta_config` resource allows you to manage your Edge Delta configurations
 
 ## Example Usage
 
