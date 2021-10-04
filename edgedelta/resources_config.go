@@ -28,12 +28,6 @@ func resourceConfig() *schema.Resource {
 				Optional:    true,
 				Description: "Unique configuration ID",
 			},
-			"debug": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     false,
-				Description: "Debug flag",
-			},
 		},
 	}
 }
