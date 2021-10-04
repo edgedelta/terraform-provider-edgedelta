@@ -8,7 +8,7 @@ import (
 )
 
 func Provider() *schema.Provider {
-	p := &schema.Provider{
+	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			// Required params
 			"org_id": {
@@ -36,7 +36,6 @@ func Provider() *schema.Provider {
 		DataSourcesMap:       map[string]*schema.Resource{},
 		ConfigureContextFunc: providerConfigure,
 	}
-	return p
 }
 
 type ProviderMetadata struct {
