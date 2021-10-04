@@ -41,5 +41,5 @@ resource "edgedelta_config" "config_with_id" {
 
 | Name           | Description                                                                                                                             | Type   | Default | Required |
 |----------------|-----------------------------------------------------------------------------------------------------------------------------------------|--------|---------|----------|
-| conf_id        | Unique configuration ID. When not specified in resource schema, a new Edge Delta config will be created on the first  `terraform apply` | String | ""      | no       |
+| conf_id        | The pre-existing unique configuration ID. When not specified in resource schema, a new Edge Delta config will be created on the first  `terraform apply` | String | ""      | no       |
 | config_content | Configuration file data                                                                                                                 | String | n/a     | yes      |
