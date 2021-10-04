@@ -27,6 +27,26 @@ provider "edgedelta" {
   api_secret         = var.ED_API_TOKEN
 }
 
+output "instance1_conf_id" {
+  value              = edgedelta_config.conf_without_id.id
+  description        = "The config ID created of the edgedelta_config instance"
+}
+
+output "instance1_tag" {
+  value              = edgedelta_config.conf_without_id.tag
+  description        = "The tag created of the edgedelta_config instance"
+}
+
+output "instance2_conf_id" {
+  value              = edgedelta_config.config_with_id.id
+  description        = "The config ID of the edgedelta_config instance"
+}
+
+output "instance2_tag" {
+  value              = edgedelta_config.config_with_id.tag
+  description        = "The tag of the edgedelta_config instance"
+}
+
 resource "edgedelta_config" "conf_without_id" {
   config_content     = file("/path/to/ed-config/file.yml")
 }

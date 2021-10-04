@@ -28,6 +28,11 @@ func resourceConfig() *schema.Resource {
 				Optional:    true,
 				Description: "Unique configuration ID",
 			},
+			// Computed
+			"tag": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -78,6 +83,8 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		d.SetId(apiResp.ID)
 		d.Set("conf_id", confID)
 		d.Set("org_id", apiResp.OrgID)
+		d.Set("tag", apiResp.Tag)
+
 	} else {
 		// First run of the terraform config, just update the existing ed-config
 		apiResp, err := meta.client.updateConfigWithID(confID, confDataObj)
@@ -92,6 +99,7 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		d.SetId(apiResp.ID)
 		d.Set("conf_id", apiResp.ID)
 		d.Set("org_id", apiResp.OrgID)
+		d.Set("tag", apiResp.Tag)
 	}
 
 	return diags
@@ -128,6 +136,7 @@ func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface
 	d.SetId(apiResp.ID)
 	d.Set("conf_id", confID)
 	d.Set("org_id", apiResp.OrgID)
+	d.Set("tag", apiResp.Tag)
 
 	return diags
 }
