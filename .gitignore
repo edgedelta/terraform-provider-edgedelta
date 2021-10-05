@@ -56,3 +56,4 @@ override.tf.json
 terraform.rc
 
 *.yml
+!.goreleaser.yml
