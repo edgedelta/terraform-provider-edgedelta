@@ -146,3 +146,19 @@ The client has a number of functions, the detailed function information can be f
 |updateConfigWithID|`confs`|**configID**: `string` <br><br>  **configObject**: [Config](../edgedelta/types.go)|[*UpdateConfigResponse](../edgedelta/types.go)|
 
 ## Publishing the Provider
+
+You need to follow a number of simple steps to publish the provider. Publishing the provider to Terraform Registry is a pretty straightforward process. The steps described here are mainly taken from [the official Terraform documentation](https://www.terraform.io/docs/registry/providers/publishing.html).
+
+### Preparing the Releaser
+
+* Generate a signing key following the instructions [here](https://www.terraform.io/docs/registry/providers/publishing.html#preparing-and-adding-a-signing-key). You will later use this key to sign the provider releases.
+* Create GoReleaser and GitHub Actions configuration files in `.goreleaser.yml` and `.github/workflows/release.yml` in the project repository, respectively. There is an exisitng configuration in the Edge Delta provider repo at the time being, however if you're planning to create one, [this GoReleaser config](https://github.com/hashicorp/terraform-provider-scaffolding/blob/main/.goreleaser.yml) and [this GitHub Actions config](https://github.com/hashicorp/terraform-provider-scaffolding/blob/main/.github/workflows/release.yml) are a good examples.
+* Add the ASCII-armored GPG private key and key password to the repo secrets. Detailed instructions can be found in the 4th step of [this listing](https://www.terraform.io/docs/registry/providers/publishing.html#github-actions-preferred-).
+* To test the functionality of the GitHub Actions releaser, push a new version tag.
+
+### Publishing the Release to Registry
+
+* Go to [Terraform Registry](https://registry.terraform.io/) and sign-in with your GitHub account.
+* Authorize the registry for Edge Delta
+* Add your ASCII-armored public key, which you have generated before, to the Terraform Registry
+* Go to [publish page](https://registry.terraform.io/publish/provider), or [Edge Delta provider page](https://registry.terraform.io/providers/edgedelta/edgedelta) to publish the provider for the new versions.
