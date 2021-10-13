@@ -1,0 +1,7 @@
+{
+    "scope": "tag:${tag}",
+    "mail_recipients": "lorem.ipsum@example.org",
+    "triggers": [],
+    "suppression_window": "3h",
+    "merge_level": "none"
+}
