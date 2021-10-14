@@ -109,3 +109,42 @@ func (cli *APIClient) UpdateConfigWithID(configID string, configObject Config) (
 	}
 	return &responseData, nil
 }
+
+func (cli *APIClient) GetMonitorWithID(monitorID string) (*GetMonitorResponse, error) {
+	cli.initializeHTTPClient()
+	b, _, err := cli.doRequest("alert_definitions", monitorID, http.MethodGet, true, nil)
+	if err != nil {
+		return nil, err
+	}
+	var responseData GetMonitorResponse
+	if err := json.Unmarshal(b, &responseData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal the response body: %s", err)
+	}
+	return &responseData, nil
+}
+
+func (cli *APIClient) CreateMonitor(monitor Monitor) (*CreateMonitorResponse, error) {
+	cli.initializeHTTPClient()
+	b, _, err := cli.doRequest("alert_definitions", "", http.MethodPost, true, monitor)
+	if err != nil {
+		return nil, err
+	}
+	var responseData CreateMonitorResponse
+	if err := json.Unmarshal(b, &responseData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal the response body: %s", err)
+	}
+	return &responseData, nil
+}
+
+func (cli *APIClient) UpdateMonitorWithID(monitorID string, monitor Monitor) (*UpdateMonitorResponse, error) {
+	cli.initializeHTTPClient()
+	b, _, err := cli.doRequest("alert_definitions", monitorID, http.MethodPut, true, monitor)
+	if err != nil {
+		return nil, err
+	}
+	var responseData UpdateMonitorResponse
+	if err := json.Unmarshal(b, &responseData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal the response body: %s", err)
+	}
+	return &responseData, nil
+}
