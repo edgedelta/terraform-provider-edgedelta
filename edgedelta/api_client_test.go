@@ -32,7 +32,7 @@ func TestGetConfigWithID(t *testing.T) {
 		return
 	}
 
-	cli := ConfigAPIClient{
+	cli := APIClient{
 		OrgID:      *orgID,
 		apiSecret:  *apiKey,
 		APIBaseURL: *apiEndpoint,
@@ -64,7 +64,7 @@ func TestUpdateConfigWithID(t *testing.T) {
 		return
 	}
 
-	cli := ConfigAPIClient{
+	cli := APIClient{
 		OrgID:      *orgID,
 		APIBaseURL: *apiEndpoint,
 	}
@@ -106,7 +106,7 @@ func TestCreateConfigWithID(t *testing.T) {
 		return
 	}
 
-	cli := ConfigAPIClient{
+	cli := APIClient{
 		OrgID:      *orgID,
 		APIBaseURL: *apiEndpoint,
 		apiSecret:  *apiKey,
