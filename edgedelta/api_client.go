@@ -61,7 +61,7 @@ func (cli *APIClient) doRequest(entityName string, entityID string, method strin
 	return body, resp.StatusCode, nil
 }
 
-func (cli *APIClient) getConfigWithID(configID string) (*GetConfigResponse, error) {
+func (cli *APIClient) GetConfigWithID(configID string) (*GetConfigResponse, error) {
 	cli.initializeHTTPClient()
 	b, _, err := cli.doRequest("confs", configID, http.MethodGet, true)
 	if err != nil {
@@ -74,7 +74,7 @@ func (cli *APIClient) getConfigWithID(configID string) (*GetConfigResponse, erro
 	return &responseData, nil
 }
 
-func (cli *APIClient) createConfig(configObject Config) (*CreateConfigResponse, error) {
+func (cli *APIClient) CreateConfig(configObject Config) (*CreateConfigResponse, error) {
 	cli.initializeHTTPClient()
 	b, _, err := cli.doRequest("confs", "", http.MethodPost, true)
 	if err != nil {
@@ -87,7 +87,7 @@ func (cli *APIClient) createConfig(configObject Config) (*CreateConfigResponse, 
 	return &responseData, nil
 }
 
-func (cli *APIClient) updateConfigWithID(configID string, configObject Config) (*UpdateConfigResponse, error) {
+func (cli *APIClient) UpdateConfigWithID(configID string, configObject Config) (*UpdateConfigResponse, error) {
 	cli.initializeHTTPClient()
 	b, _, err := cli.doRequest("confs", configID, http.MethodPut, true)
 	if err != nil {
