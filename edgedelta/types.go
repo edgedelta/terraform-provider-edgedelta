@@ -11,3 +11,16 @@ type Config struct {
 type GetConfigResponse Config
 type UpdateConfigResponse Config
 type CreateConfigResponse Config
+
+type Monitor struct {
+	Enabled bool   `json:"enabled"`
+	Name    string `json:"name"`
+	ID      string `json:"id"`
+	OrgID   string `json:"orgID"`
+	Payload string `json:"payload"`
+	Type    string `json:"type"`
+}
+
+type GetMonitorResponse Config
+type UpdateMonitorResponse Config
+type CreateMonitorResponse Config
