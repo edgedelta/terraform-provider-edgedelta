@@ -1,8 +1,10 @@
 package edgedelta
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -28,7 +30,7 @@ func (cli *APIClient) initializeHTTPClient() {
 	}
 }
 
-func (cli *APIClient) doRequest(entityName string, entityID string, method string, checkOKResp bool) ([]byte, int, error) {
+func (cli *APIClient) doRequest(entityName string, entityID string, method string, checkOKResp bool, bodyObj interface{}) ([]byte, int, error) {
 	var baseURL *url.URL
 	var err error
 
@@ -40,7 +42,15 @@ func (cli *APIClient) doRequest(entityName string, entityID string, method strin
 	if err != nil {
 		return nil, 0, fmt.Errorf("url parsing error: %v (base url was '%s')", err, cli.APIBaseURL)
 	}
-	req, err := http.NewRequest(method, baseURL.String(), nil)
+	var d io.Reader = nil
+	if bodyObj != nil {
+		db, err := json.Marshal(bodyObj)
+		if err != nil {
+			return nil, 0, fmt.Errorf("failed to marshal the config object: %v", err)
+		}
+		d = bytes.NewBuffer(db)
+	}
+	req, err := http.NewRequest(method, baseURL.String(), d)
 	if err != nil {
 		return nil, 0, fmt.Errorf("http request wrapper error: %v (base url was '%s')", err, cli.APIBaseURL)
 	}
@@ -63,7 +73,7 @@ func (cli *APIClient) doRequest(entityName string, entityID string, method strin
 
 func (cli *APIClient) GetConfigWithID(configID string) (*GetConfigResponse, error) {
 	cli.initializeHTTPClient()
-	b, _, err := cli.doRequest("confs", configID, http.MethodGet, true)
+	b, _, err := cli.doRequest("confs", configID, http.MethodGet, true, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +86,7 @@ func (cli *APIClient) GetConfigWithID(configID string) (*GetConfigResponse, erro
 
 func (cli *APIClient) CreateConfig(configObject Config) (*CreateConfigResponse, error) {
 	cli.initializeHTTPClient()
-	b, _, err := cli.doRequest("confs", "", http.MethodPost, true)
+	b, _, err := cli.doRequest("confs", "", http.MethodPost, true, configObject)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +99,7 @@ func (cli *APIClient) CreateConfig(configObject Config) (*CreateConfigResponse, 
 
 func (cli *APIClient) UpdateConfigWithID(configID string, configObject Config) (*UpdateConfigResponse, error) {
 	cli.initializeHTTPClient()
-	b, _, err := cli.doRequest("confs", configID, http.MethodPut, true)
+	b, _, err := cli.doRequest("confs", configID, http.MethodPut, true, configObject)
 	if err != nil {
 		return nil, err
 	}
