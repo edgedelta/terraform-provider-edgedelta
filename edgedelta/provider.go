@@ -39,13 +39,13 @@ func Provider() *schema.Provider {
 }
 
 type ProviderMetadata struct {
-	client ConfigAPIClient
+	client APIClient
 }
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 
 	return &ProviderMetadata{
-		client: ConfigAPIClient{
+		client: APIClient{
 			APIBaseURL: d.Get("api_endpoint").(string),
 			OrgID:      d.Get("org_id").(string),
 			apiSecret:  d.Get("api_secret").(string),
