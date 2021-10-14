@@ -1,0 +1,11 @@
+{
+    "scope": "tag:${tag},tag:pattern-check-example",
+    "merge_level": "none",
+    "mail_recipients": "test1@example.org",
+    "triggers": [
+        "slack-trigger2"
+    ],
+    "suppression_window": "12h",
+    "timezone": "Europe/London",
+    "trigger_template": "notify_content:\n    title: \"Edge Delta Pattern-Check Alert\""
+}
