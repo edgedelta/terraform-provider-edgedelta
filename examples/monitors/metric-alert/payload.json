@@ -1,5 +1,5 @@
 {
-    "tag": "metric-alert-example",
+    "tag": "prod-us-west",
     "agg_func": "sum",
     "agg_window": "1h",
     "lookback": "12h",
