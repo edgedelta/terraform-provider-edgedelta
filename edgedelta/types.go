@@ -21,6 +21,6 @@ type Monitor struct {
 	Type    string `json:"type"`
 }
 
-type GetMonitorResponse Config
-type UpdateMonitorResponse Config
-type CreateMonitorResponse Config
+type GetMonitorResponse Monitor
+type UpdateMonitorResponse Monitor
+type CreateMonitorResponse Monitor
