@@ -1,5 +1,5 @@
 {
-    "scope": "tag:pattern-check-example",
+    "scope": "tag:prod-us-west",
     "merge_level": "none",
     "mail_recipients": "test1@example.org",
     "triggers": [
