@@ -17,12 +17,12 @@ provider "edgedelta" {
 }
 
 output "monitor_id" {
-    value = edgedelta_monitor.bare_minimum_skyline.id
+    value = edgedelta_monitor.example_monitor.id
 }
 
-resource "edgedelta_monitor" "bare_minimum_skyline" {
-    name    = "skyline-example-monitor"
-    type    = "pattern-skyline"
-    payload = file("payload.json") 
+resource "edgedelta_monitor" "example_monitor" {
+    name     = "metric-alert-example-monitor"
+    type     = "metric-alert"
+    enabled  = true
+    payload  = file("payload.json")
 }
-

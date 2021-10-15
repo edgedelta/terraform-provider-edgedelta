@@ -1,0 +1,28 @@
+{
+    "tag": "metric-alert-example",
+    "agg_func": "sum",
+    "agg_window": "1h",
+    "lookback": "12h",
+    "rule": "api_access",
+    "stat_types": [
+        "count"
+    ],
+    "measurement": "api_access.count",
+    "source_filters": {
+        "sourcetype": "K8s"
+    },
+    "group_bys": [
+        "k8s_namespace"
+    ],
+    "anomaly_greater_than": 60,
+    "anomaly_less_than": 80,
+    "value_greater_than": 10,
+    "value_less_than": 40,
+    "mail_recipients": "lorem.ipsum@example.org",
+    "triggers": [
+        "my-slack"
+    ],
+    "trigger_template": "notify_content:\n    title: \"Edge Delta Metric Alert\"",
+    "suppression_window": "12h",
+    "timezone": "Europe/London"
+}

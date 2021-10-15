@@ -1,5 +1,5 @@
 {
-    "scope": "tag:${tag},tag:pattern-check-example",
+    "scope": "tag:pattern-check-example",
     "merge_level": "none",
     "mail_recipients": "test1@example.org",
     "triggers": [

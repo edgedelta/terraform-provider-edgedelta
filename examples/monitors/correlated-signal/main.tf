@@ -17,14 +17,12 @@ provider "edgedelta" {
 }
 
 output "monitor_id" {
-    value = edgedelta_monitor.existing_monitor_skyline.id
+    value = edgedelta_monitor.example_monitor.id
 }
 
-resource "edgedelta_monitor" "existing_monitor_skyline" {
-    monitor_id = "<your-existing-configuration-id>"
-    name       = "skyline-example-monitor"
-    type       = "pattern-skyline"
-    enabled    = true
-    payload    = file("payload.json") 
+resource "edgedelta_monitor" "example_monitor" {
+    name     = "correlated-signal-example-monitor"
+    type     = "correlated-signal"
+    enabled  = true
+    payload  = file("payload.json")
 }
-

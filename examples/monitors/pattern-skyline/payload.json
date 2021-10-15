@@ -1,0 +1,11 @@
+{
+    "scope": "tag:pattern-skyline-example",
+    "merge_level": "medium",
+    "mail_recipients": "lorem.ipsum@example.org,dolor.sit@example.com",
+    "triggers": [
+        "my-slack"
+    ],
+    "suppression_window": "3h",
+    "timezone": "Europe/Istanbul",
+    "trigger_template": "notify_content:\n    title: \"Edge Delta Pattern-Skyline Alert\""
+}
