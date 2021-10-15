@@ -13,6 +13,7 @@ var (
 		"pattern-check",
 		"pattern-skyline",
 		"correlated-signal",
+		"metric-alert",
 	}
 )
 

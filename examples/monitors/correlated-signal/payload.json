@@ -1,5 +1,5 @@
 {
-    "scope": "tag:${tag},tag:correlated-signal-example",
+    "scope": "tag:correlated-signal-example",
     "mail_recipients": "nosuchuser@example.org",
     "triggers": [
         "slack-trigger"

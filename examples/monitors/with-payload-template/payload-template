@@ -1,5 +1,5 @@
 {
-    "scope": "tag:${tag},tag:pattern-skyline-example",
+    "scope": "tag:${tag}",
     "merge_level": "medium",
     "mail_recipients": "lorem.ipsum@example.org,dolor.sit@example.com",
     "triggers": [
