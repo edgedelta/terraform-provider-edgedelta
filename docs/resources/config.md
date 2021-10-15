@@ -63,3 +63,10 @@ resource "edgedelta_config" "config_with_id" {
 |----------------|-----------------------------------------------------------------------------------------------------------------------------------------|--------|---------|----------|
 | conf_id        | The pre-existing unique configuration ID. When not specified in resource schema, a new Edge Delta config will be created on the first  `terraform apply` | String | ""      | no       |
 | config_content | Configuration file data                                                                                                                 | String | n/a     | yes      |
+
+## Outputs
+
+| Name | Description | Type |
+|------|-------------|------|
+| tag  | Configuration instance tag. The output value is the exact value of the `tag` key in the `config_content`. | String |
+| id | When a resource is created, ID is set to the active configuration ID of the config instance. Using `id` instead of `config_id` as the configuration ID output is highly encouraged. | String

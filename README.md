@@ -42,11 +42,11 @@ Further [usage documentation is available in the provider repo](docs/index.md).
 ## Developer Requirements
 
 * [Terraform](https://www.terraform.io/downloads.html) version 0.13.0+
-* [Go](https://golang.org/doc/install) version 1.16.x (to build the provider plugin)
+* [Go](https://golang.org/doc/install) version 1.17 (to build the provider plugin)
 
 ## Developing the Provider
 
-If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (version 1.16+ is required).
+If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (version 1.17 is required).
 
 First clone the repository to: `$GOPATH/src/edgedelta.com/edgedelta/terraform-provider-edgedelta`
 
