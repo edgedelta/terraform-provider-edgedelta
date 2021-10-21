@@ -6,5 +6,5 @@
     ],
     "suppression_window": "3h",
     "timezone": "Europe/Istanbul",
-    "trigger_template": "notify_content:\n    title: \"Edge Delta Correlated-Signal Alert\""
+    "trigger_template": ""
 }
