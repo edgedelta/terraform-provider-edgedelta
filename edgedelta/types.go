@@ -19,6 +19,7 @@ type Monitor struct {
 	OrgID   string `json:"orgID"`
 	Payload string `json:"payload"`
 	Type    string `json:"type"`
+	Creator string `json:"creator"`
 }
 
 type GetMonitorResponse Monitor
