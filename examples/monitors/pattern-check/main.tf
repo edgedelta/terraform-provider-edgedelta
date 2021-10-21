@@ -25,4 +25,5 @@ resource "edgedelta_monitor" "example_monitor" {
     type     = "pattern-check"
     enabled  = true
     payload  = file("payload.json")
+    creator  = "creator@email.domain"
 }
