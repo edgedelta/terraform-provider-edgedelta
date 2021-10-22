@@ -39,6 +39,7 @@ resource "edgedelta_monitor" "bare_minimum" {
     name    = "example-monitor"
     type    = "pattern-skyline"
     payload = file("payload1.json") 
+    creator = "creator-mail@example.org"
 }
 
 resource "edgedelta_monitor" "existing_monitor" {
@@ -46,6 +47,7 @@ resource "edgedelta_monitor" "existing_monitor" {
     name       = "existing-monitor"
     type       = "pattern-skyline"
     payload    = file("payload2.json") 
+    creator = "creator-mail@example.org"
 }
 ```
 
@@ -56,6 +58,7 @@ resource "edgedelta_monitor" "existing_monitor" {
 |name|Name of the monitor|String|n/a|yes|
 |type|Type of the monitor. Must be one of `pattern-check`, `pattern-skyline` and `correlated-signal`.|String|n/a|yes|
 |payload|The monitor payload provides detailed information about the alert defintion. Payload must be in `JSON` format. The schema of the payload may be differ depending on the type of the monitor.|String|n/a|yes|
+|creator|Mail address of the monitor creator.|String|n/a|yes|
 |monitor_id|Unique ID of the monitor. If not provided, a new monitor will be created by the provider with the specified name, type and the payload.|String|""|no|
 |enabled|Monitor activity flag. When set to `false`, the monitor will be flagged as inactive, and active otherwise.|Boolean|true|no|
 
