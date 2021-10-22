@@ -59,8 +59,8 @@ resource "edgedelta_monitor" "existing_monitor" {
 |type|Type of the monitor. Must be one of `pattern-check`, `pattern-skyline` and `correlated-signal`.|String|n/a|yes|
 |payload|The monitor payload provides detailed information about the alert defintion. Payload must be in `JSON` format. The schema of the payload may be differ depending on the type of the monitor.|String|n/a|yes|
 |creator|Mail address of the monitor creator.|String|n/a|yes|
+|enabled|Monitor activity flag. When set to `false`, the monitor will be flagged as inactive, and active otherwise.|Boolean|n/a|yes|
 |monitor_id|Unique ID of the monitor. If not provided, a new monitor will be created by the provider with the specified name, type and the payload.|String|""|no|
-|enabled|Monitor activity flag. When set to `false`, the monitor will be flagged as inactive, and active otherwise.|Boolean|true|no|
 
 ### Outputs
 
