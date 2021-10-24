@@ -32,13 +32,13 @@ func TestGetConfigWithID(t *testing.T) {
 		return
 	}
 
-	cli := ConfigAPIClient{
+	cli := APIClient{
 		OrgID:      *orgID,
 		apiSecret:  *apiKey,
 		APIBaseURL: *apiEndpoint,
 	}
 
-	confObject, err := cli.getConfigWithID(*confID)
+	confObject, err := cli.GetConfigWithID(*confID)
 	if err != nil {
 		t.Error(err)
 	}
@@ -64,7 +64,7 @@ func TestUpdateConfigWithID(t *testing.T) {
 		return
 	}
 
-	cli := ConfigAPIClient{
+	cli := APIClient{
 		OrgID:      *orgID,
 		APIBaseURL: *apiEndpoint,
 	}
@@ -79,7 +79,7 @@ func TestUpdateConfigWithID(t *testing.T) {
 		Content: string(confDataRaw[:]),
 	}
 
-	confObject, err := cli.updateConfigWithID(*confID, confData)
+	confObject, err := cli.UpdateConfigWithID(*confID, confData)
 	if err != nil {
 		t.Error(err)
 		return
@@ -106,7 +106,7 @@ func TestCreateConfigWithID(t *testing.T) {
 		return
 	}
 
-	cli := ConfigAPIClient{
+	cli := APIClient{
 		OrgID:      *orgID,
 		APIBaseURL: *apiEndpoint,
 		apiSecret:  *apiKey,
@@ -122,7 +122,7 @@ func TestCreateConfigWithID(t *testing.T) {
 		Content: string(confDataRaw[:]),
 	}
 
-	confObject, err := cli.createConfig(confData)
+	confObject, err := cli.CreateConfig(confData)
 	if err != nil {
 		t.Error(err)
 		return

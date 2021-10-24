@@ -4,20 +4,21 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"time"
 )
 
-type ConfigAPIClient struct {
+type APIClient struct {
 	OrgID      string
 	APIBaseURL string
 	apiSecret  string
 	cl         *http.Client
 }
 
-func (cli *ConfigAPIClient) initializeHTTPClient() {
+func (cli *APIClient) initializeHTTPClient() {
 	t := http.DefaultTransport.(*http.Transport).Clone()
 	t.MaxIdleConns = 1
 	t.MaxConnsPerHost = 1
@@ -29,129 +30,130 @@ func (cli *ConfigAPIClient) initializeHTTPClient() {
 	}
 }
 
-func (cli *ConfigAPIClient) getConfigWithID(configID string) (*GetConfigResponse, error) {
-	cli.initializeHTTPClient()
+func (cli *APIClient) doRequest(entityName string, entityID string, method string, checkOKResp bool, bodyObj interface{}) ([]byte, int, error) {
+	var baseURL *url.URL
+	var err error
 
-	baseURL, err := url.Parse(fmt.Sprintf("%s/v1/orgs/%s/confs/%s", cli.APIBaseURL, cli.OrgID, configID))
-	if err != nil {
-		return nil, fmt.Errorf("url parsing error: %v (base url was '%s')", err, cli.APIBaseURL)
+	if entityID == "" {
+		baseURL, err = url.Parse(fmt.Sprintf("%s/v1/orgs/%s/%s", cli.APIBaseURL, cli.OrgID, entityName))
+	} else {
+		baseURL, err = url.Parse(fmt.Sprintf("%s/v1/orgs/%s/%s/%s", cli.APIBaseURL, cli.OrgID, entityName, entityID))
 	}
-
-	req, err := http.NewRequest(http.MethodGet, baseURL.String(), nil)
 	if err != nil {
-		return nil, fmt.Errorf("http request wrapper error: %v (base url was '%s')", err, cli.APIBaseURL)
+		return nil, 0, fmt.Errorf("url parsing error: %v (base url was '%s')", err, cli.APIBaseURL)
 	}
-
+	var d io.Reader = nil
+	if bodyObj != nil {
+		db, err := json.Marshal(bodyObj)
+		if err != nil {
+			return nil, 0, fmt.Errorf("failed to marshal the config object: %v", err)
+		}
+		d = bytes.NewBuffer(db)
+	}
+	req, err := http.NewRequest(method, baseURL.String(), d)
+	if err != nil {
+		return nil, 0, fmt.Errorf("http request wrapper error: %v (base url was '%s')", err, cli.APIBaseURL)
+	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("X-ED-API-Token", cli.apiSecret)
-
 	resp, err := cli.cl.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to do GET %s. error: %v", req.URL.RequestURI(), err)
+		return nil, 0, fmt.Errorf("failed to do '%s %s'. error: %v", req.Method, req.URL.RequestURI(), err)
 	}
 	defer resp.Body.Close()
-
-	b, err := ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read response body from: %s. err: %v", req.URL.RequestURI(), err)
+		return nil, 0, fmt.Errorf("failed to read response body from '%s'. err: %v", req.URL.RequestURI(), err)
 	}
-
-	if 200 > resp.StatusCode || resp.StatusCode > 299 {
-		return nil, fmt.Errorf("got non OK http status from: %s, status: %v, response: %q", req.URL.RequestURI(), resp.StatusCode, string(b))
+	if checkOKResp && (200 > resp.StatusCode || resp.StatusCode > 299) {
+		return nil, 0, fmt.Errorf("got non OK http status from: %s, status: %v, response: %q", req.URL.RequestURI(), resp.StatusCode, string(body))
 	}
+	return body, resp.StatusCode, nil
+}
 
+func (cli *APIClient) GetConfigWithID(configID string) (*GetConfigResponse, error) {
+	cli.initializeHTTPClient()
+	b, _, err := cli.doRequest("confs", configID, http.MethodGet, true, nil)
+	if err != nil {
+		return nil, err
+	}
 	var responseData GetConfigResponse
 	if err := json.Unmarshal(b, &responseData); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal the response body: %s", err)
 	}
-
 	return &responseData, nil
 }
 
-func (cli *ConfigAPIClient) createConfig(configObject Config) (*CreateConfigResponse, error) {
+func (cli *APIClient) CreateConfig(configObject Config) (*CreateConfigResponse, error) {
 	cli.initializeHTTPClient()
-
-	baseURL, err := url.Parse(fmt.Sprintf("%s/v1/orgs/%s/confs", cli.APIBaseURL, cli.OrgID))
+	b, _, err := cli.doRequest("confs", "", http.MethodPost, true, configObject)
 	if err != nil {
-		return nil, fmt.Errorf("url parsing error: %v (base url was '%s')", err, cli.APIBaseURL)
+		return nil, err
 	}
-
-	d, err := json.Marshal(configObject)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal the config object: %v", err)
-	}
-
-	req, err := http.NewRequest(http.MethodPost, baseURL.String(), bytes.NewBuffer(d))
-	if err != nil {
-		return nil, fmt.Errorf("http request wrapper error: %v (base url was '%s')", err, cli.APIBaseURL)
-	}
-
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("X-ED-API-Token", cli.apiSecret)
-
-	resp, err := cli.cl.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to do POST %s. error: %v", req.URL.RequestURI(), err)
-	}
-	defer resp.Body.Close()
-
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response body from: %s. err: %v", req.URL.RequestURI(), err)
-	}
-
-	if 200 > resp.StatusCode || resp.StatusCode > 299 {
-		return nil, fmt.Errorf("got non OK http status from: %s, status: %v, response: %q", req.URL.RequestURI(), resp.StatusCode, string(b))
-	}
-
 	var responseData CreateConfigResponse
 	if err := json.Unmarshal(b, &responseData); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal the response body: %s", err)
 	}
-
 	return &responseData, nil
 }
 
-func (cli *ConfigAPIClient) updateConfigWithID(configID string, configObject Config) (*UpdateConfigResponse, error) {
+func (cli *APIClient) UpdateConfigWithID(configID string, configObject Config) (*UpdateConfigResponse, error) {
 	cli.initializeHTTPClient()
-
-	baseURL, err := url.Parse(fmt.Sprintf("%s/v1/orgs/%s/confs/%s", cli.APIBaseURL, cli.OrgID, configID))
+	b, _, err := cli.doRequest("confs", configID, http.MethodPut, true, configObject)
 	if err != nil {
-		return nil, fmt.Errorf("url parsing error: %v (base url was '%s')", err, cli.APIBaseURL)
+		return nil, err
 	}
-
-	d, err := json.Marshal(configObject)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal the config object: %v", err)
-	}
-
-	req, err := http.NewRequest(http.MethodPut, baseURL.String(), bytes.NewBuffer(d))
-	if err != nil {
-		return nil, fmt.Errorf("http request wrapper error: %v (base url was '%s')", err, cli.APIBaseURL)
-	}
-
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("X-ED-API-Token", cli.apiSecret)
-
-	resp, err := cli.cl.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to do PUT %s. error: %v", req.URL.RequestURI(), err)
-	}
-	defer resp.Body.Close()
-
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response body from: %s. err: %v", req.URL.RequestURI(), err)
-	}
-
-	if 200 > resp.StatusCode || resp.StatusCode > 299 {
-		return nil, fmt.Errorf("got non OK http status from: %s, status: %v, response: %q", req.URL.RequestURI(), resp.StatusCode, string(b))
-	}
-
 	var responseData UpdateConfigResponse
 	if err := json.Unmarshal(b, &responseData); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal the response body: %s", err)
 	}
-
 	return &responseData, nil
+}
+
+func (cli *APIClient) GetMonitorWithID(monitorID string) (*GetMonitorResponse, error) {
+	cli.initializeHTTPClient()
+	b, _, err := cli.doRequest("alert_definitions", monitorID, http.MethodGet, true, nil)
+	if err != nil {
+		return nil, err
+	}
+	var responseData GetMonitorResponse
+	if err := json.Unmarshal(b, &responseData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal the response body: %s", err)
+	}
+	return &responseData, nil
+}
+
+func (cli *APIClient) CreateMonitor(monitor Monitor) (*CreateMonitorResponse, error) {
+	cli.initializeHTTPClient()
+	b, _, err := cli.doRequest("alert_definitions", "", http.MethodPost, true, monitor)
+	if err != nil {
+		return nil, err
+	}
+	var responseData CreateMonitorResponse
+	if err := json.Unmarshal(b, &responseData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal the response body: %s", err)
+	}
+	return &responseData, nil
+}
+
+func (cli *APIClient) UpdateMonitorWithID(monitorID string, monitor Monitor) (*UpdateMonitorResponse, error) {
+	cli.initializeHTTPClient()
+	b, _, err := cli.doRequest("alert_definitions", monitorID, http.MethodPut, true, monitor)
+	if err != nil {
+		return nil, err
+	}
+	var responseData UpdateMonitorResponse
+	if err := json.Unmarshal(b, &responseData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal the response body: %s", err)
+	}
+	return &responseData, nil
+}
+
+func (cli *APIClient) DeleteMonitorWithID(monitorID string) error {
+	cli.initializeHTTPClient()
+	_, _, err := cli.doRequest("alert_definitions", monitorID, http.MethodDelete, true, nil)
+	if err != nil {
+		return err
+	}
+	return nil
 }

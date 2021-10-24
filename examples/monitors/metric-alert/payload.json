@@ -1,0 +1,29 @@
+{
+    "tag": "prod-us-west",
+    "agg_func": "sum",
+    "agg_window": "5m",
+    "lookback": "12h",
+    "rule": "api_access",
+    "stat_types": [
+        "count"
+    ],
+    "measurement": "api_access.count",
+    "source_filters": {
+        "sourcetype": "K8s",
+        "k8s_namespace": "default",
+        "k8s_container_name": "admin",
+        "k8s_controller_kind": "ReplicaSet",
+        "k8s_controller_logical_name": "admin-api-deployment"
+    },
+    "group_bys": [
+        "k8s_pod_name"
+    ],
+    "anomaly_greater_than": 95,
+    "mail_recipients": "lorem.ipsum@example.org",
+    "triggers": [
+        "my-slack"
+    ],
+    "trigger_template": "",
+    "suppression_window": "12h",
+    "timezone": "Europe/London"
+}

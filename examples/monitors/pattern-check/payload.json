@@ -1,0 +1,11 @@
+{
+    "scope": "tag:prod-us-west",
+    "merge_level": "none",
+    "mail_recipients": "test1@example.org",
+    "triggers": [
+        "slack-trigger2"
+    ],
+    "suppression_window": "12h",
+    "timezone": "Europe/London",
+    "trigger_template": ""
+}

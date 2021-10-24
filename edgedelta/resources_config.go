@@ -71,7 +71,7 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 	if confID == "" {
 		// Create a new config
-		apiResp, err := meta.client.createConfig(confDataObj)
+		apiResp, err := meta.client.CreateConfig(confDataObj)
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
@@ -87,7 +87,7 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	} else {
 		// First run of the terraform config, just update the existing ed-config
-		apiResp, err := meta.client.updateConfigWithID(confID, confDataObj)
+		apiResp, err := meta.client.UpdateConfigWithID(confID, confDataObj)
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
@@ -124,7 +124,7 @@ func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface
 
 		activeConfID = d.Id()
 	}
-	apiResp, err := meta.client.getConfigWithID(activeConfID)
+	apiResp, err := meta.client.GetConfigWithID(activeConfID)
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -155,7 +155,7 @@ func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	confDataObj = Config{
 		Content: confData,
 	}
-	_, err := meta.client.updateConfigWithID(confID, confDataObj)
+	_, err := meta.client.UpdateConfigWithID(confID, confDataObj)
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,

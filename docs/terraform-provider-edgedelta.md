@@ -38,7 +38,7 @@ The current provider params are as follows:
 
 > Type: `map[string]*schema.Resource`
 
-The resources map provides a mapping of resource names and resource schemas. We currently have one resource, namely `edgedelta_config`, and the currrent resource map is as follows:
+The resources map provides a mapping of resource names and resource schemas. We currently have two resources, namely `edgedelta_config` and `edgedelta_monitor`, and the current resource maps are as follows:
 
 ```go
 map[string]*schema.Resource{
@@ -67,6 +67,46 @@ map[string]*schema.Resource{
             },
         },
     },
+    "edgedelta_monitor": {
+		CreateContext: resourceMonitorCreate,
+		ReadContext:   resourceMonitorRead,
+		UpdateContext: resourceMonitorUpdate,
+		DeleteContext: resourceMonitorDelete,
+		Schema: map[string]*schema.Schema{
+			// Required params
+			"name": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Monitor name",
+			},
+			"type": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Monitor type",
+			},
+			"enabled": {
+				Type:        schema.TypeBool,
+				Required:    true,
+				Description: "Monitor enabled flag",
+			},
+			"payload": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Monitor payload",
+			},
+			"creator": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Monitor creator (email)",
+			},
+			// Optional params
+			"monitor_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Unique monitor ID",
+			},
+		},
+	}
 }
 ```
 
@@ -84,9 +124,9 @@ The metadata instance is initialized in the `providerConfigure` function in [edg
 
 ### Resource Struct
 
-The resource struct defines the parameters and CRUD functions of that particular resource. We currently have one resource, namely `edgedelta_config`, and is defined in [resources_config.go](../edgedelta/resources_config.go).
+The resource struct defines the parameters and CRUD functions of that particular resource. We currently have two resources, namely `edgedelta_config` and `edgedelta_monitor`, and are defined in [resources_config.go](../edgedelta/resources_config.go) and [resources_monitor.go](../edgedelta/resources_monitor.go) respectively.
 
-Each resource instance has an additional `id` field, not defined explicitly in the resource struct, which is an unique identifier of the instance. In our implementation, we have used the `id` field to hold the configuration id data, as well as the `conf_id` param. This design choice is made to prevent the `conf_id` to be set to `nil` every time `terraform apply` is used with a resource with no explicit `conf_id`. The `id` then holds the real configuration ID after the creation process to later use in the API calls.
+Each resource instance has an additional `id` field, not defined explicitly in the resource struct, which is an unique identifier of the instance. In our implementation, we have used the `id` field to hold the configuration id and monitor id data, as well as the `conf_id` and `monitor_id` params. This design choice is made to prevent the `conf_id` and `monitor_id` to be set to `nil` every time `terraform apply` is used with a resource with no explicit `conf_id` or `monitor_id`. The `id` then holds the real resource ID after the creation process to later use in the API calls.
 
 #### Schema
 
@@ -124,10 +164,10 @@ Every resource has 4 functions to control the resource state: create, read, upda
 
 ### API Client
 
-The API client is a minimal SDK that provides the functionality to create and update the config resources. The API client is a struct defined in [api_client.go](../edgedelta/api_client.go) which definition can be seen below:
+The API client is a minimal SDK that provides the functionality to create and update the resources in Edge Delta's side. The API client is a struct defined in [api_client.go](../edgedelta/api_client.go) which definition can be seen below:
 
 ```go
-type ConfigAPIClient struct {
+type APIClient struct {
 	OrgID      string
 	APIBaseURL string
 	apiSecret  string
@@ -141,9 +181,12 @@ The client has a number of functions, the detailed function information can be f
 
 |Name|API Resource Tag|Params|Return Value|
 |-|-|-|-|
-|getConfigWithID|`confs`|**configID**: `string`|[*GetConfigResponse](../edgedelta/types.go)|
-|createConfig|`confs`|**configObject**: [Config](../edgedelta/types.go)|[*CreateConfigResponse](../edgedelta/types.go)|
-|updateConfigWithID|`confs`|**configID**: `string` <br><br>  **configObject**: [Config](../edgedelta/types.go)|[*UpdateConfigResponse](../edgedelta/types.go)|
+|GetConfigWithID|`confs`|**configID**: `string`|[*GetConfigResponse](../edgedelta/types.go)|
+|CreateConfig|`confs`|**configObject**: [Config](../edgedelta/types.go)|[*CreateConfigResponse](../edgedelta/types.go)|
+|UpdateConfigWithID|`confs`|**configID**: `string` <br><br>  **configObject**: [Config](../edgedelta/types.go)|[*UpdateConfigResponse](../edgedelta/types.go)|
+|GetMonitorWithID|`monitors`|**monitorID**: `string`|[*GetMonitorResponse](../edgedelta/types.go)|
+|CreateMonitor|`monitors`|**monitor**: [Monitor](../edgedelta/types.go)|[*CreateMonitorResponse](../edgedelta/types.go)|
+|UpdateMonitorWithID|`monitors`|**monitorID**: `string` <br><br>  **monitor**: [Monitor](../edgedelta/types.go)|[*UpdateMonitorResponse](../edgedelta/types.go)|
 
 ## Publishing the Provider
 
