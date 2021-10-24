@@ -251,5 +251,23 @@ func resourceMonitorUpdate(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 func resourceMonitorDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	return diag.Diagnostics{}
+	meta := m.(*ProviderMetadata)
+	monitorID, _, _, _, _, _, diags := parseMonitorArgs(d)
+	if len(diags) > 0 {
+		return diags
+	}
+	if monitorID == "" {
+		// Just get the monitor id from the tf state
+		monitorID = d.Id()
+	}
+	err := meta.client.DeleteMonitorWithID(monitorID)
+	if err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Could not delete the monitor resource",
+			Detail:   fmt.Sprintf("%s", err),
+		})
+		return diags
+	}
+	return diags
 }
