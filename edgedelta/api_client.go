@@ -148,3 +148,12 @@ func (cli *APIClient) UpdateMonitorWithID(monitorID string, monitor Monitor) (*U
 	}
 	return &responseData, nil
 }
+
+func (cli *APIClient) DeleteMonitorWithID(monitorID string) error {
+	cli.initializeHTTPClient()
+	_, _, err := cli.doRequest("alert_definitions", monitorID, http.MethodDelete, true, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
