@@ -56,3 +56,5 @@ override.tf.json
 terraform.rc
 
 *.yml
+!.goreleaser.yml
+!.github/workflows/*.yml
