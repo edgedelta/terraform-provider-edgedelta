@@ -72,9 +72,12 @@ func resourceMonitor() *schema.Resource {
 			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 				meta := m.(*ProviderMetadata)
 				monitorID := d.Id()
+				if monitorID == "" { // monitorID DNE
+					return nil, fmt.Errorf("Could not determine the resource ID - possibly the ID was not set")
+				}
 				resp, err := meta.client.GetMonitorWithID(monitorID)
 				if err != nil {
-					return nil, fmt.Errorf("Could not get the resource data from API: %s", err)
+					return nil, fmt.Errorf("Could not get the resource data from API: %s (resource ID was: '%s')", err, monitorID)
 				}
 				d.SetId(resp.ID)
 				d.Set("monitor_id", monitorID)
