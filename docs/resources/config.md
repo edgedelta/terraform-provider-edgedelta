@@ -73,6 +73,8 @@ resource "edgedelta_config" "imported_config" {
 terraform import edgedelta_config.imported_config <resource-id>
 ```
 
+More detailed information about resource imports can be found in [advanced docs](../advanced.md).
+
 ## Schema
 
 | Name           | Description                                                                                                                             | Type   | Default | Required |

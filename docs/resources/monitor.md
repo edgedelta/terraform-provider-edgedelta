@@ -67,6 +67,8 @@ resource "edgedelta_monitor" "imported_monitor" {
 terraform import edgedelta_monitor.imported_monitor <resource-id>
 ```
 
+More detailed information about resource imports can be found in [advanced docs](../advanced.md).
+
 ## Schema
 
 |Name|Description|Type|Default|Required|
