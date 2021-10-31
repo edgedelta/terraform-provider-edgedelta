@@ -68,6 +68,28 @@ func resourceMonitor() *schema.Resource {
 				Description: "Unique monitor ID",
 			},
 		},
+		Importer: &schema.ResourceImporter{
+			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+				meta := m.(*ProviderMetadata)
+				monitorID := d.Id()
+				if monitorID == "" { // monitorID DNE
+					return nil, fmt.Errorf("Could not determine the resource ID - possibly the ID was not set")
+				}
+				resp, err := meta.client.GetMonitorWithID(monitorID)
+				if err != nil {
+					return nil, fmt.Errorf("Could not get the resource data from API: %s (resource ID was: '%s')", err, monitorID)
+				}
+				d.SetId(resp.ID)
+				d.Set("monitor_id", monitorID)
+				d.Set("org_id", resp.OrgID)
+				d.Set("name", resp.Name)
+				d.Set("type", resp.Type)
+				d.Set("enabled", resp.Enabled)
+				d.Set("payload", resp.Payload)
+				d.Set("creator", resp.Creator)
+				return []*schema.ResourceData{d}, nil
+			},
+		},
 	}
 }
 

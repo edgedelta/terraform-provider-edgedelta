@@ -34,6 +34,24 @@ func resourceConfig() *schema.Resource {
 				Computed: true,
 			},
 		},
+		Importer: &schema.ResourceImporter{
+			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+				meta := m.(*ProviderMetadata)
+				confID := d.Id()
+				if confID == "" { // confID DNE
+					return nil, fmt.Errorf("Could not determine the resource ID - possibly the ID was not set")
+				}
+				resp, err := meta.client.GetConfigWithID(confID)
+				if err != nil {
+					return nil, fmt.Errorf("Could not get the resource data from API: %s (resource ID was: '%s')", err, confID)
+				}
+				d.SetId(resp.ID)
+				d.Set("conf_id", confID)
+				d.Set("org_id", resp.OrgID)
+				d.Set("tag", resp.Tag)
+				return []*schema.ResourceData{d}, nil
+			},
+		},
 	}
 }
 

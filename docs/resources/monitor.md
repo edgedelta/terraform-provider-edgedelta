@@ -51,6 +51,24 @@ resource "edgedelta_monitor" "existing_monitor" {
 }
 ```
 
+## Importing Existing Monitors
+
+You can import your existing monitor resources to the terraform state using `terraform import` command with a specific monitor ID. 
+
+- Define a monitor resource
+```hcl
+resource "edgedelta_monitor" "imported_monitor" {
+
+}
+```
+
+- Run `terraform import` on terminal
+```bash
+terraform import edgedelta_monitor.imported_monitor <resource-id>
+```
+
+More detailed information about resource imports can be found in [advanced docs](../advanced.md).
+
 ## Schema
 
 |Name|Description|Type|Default|Required|

@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -30,7 +31,7 @@ func (cli *APIClient) initializeHTTPClient() {
 	}
 }
 
-func (cli *APIClient) doRequest(entityName string, entityID string, method string, checkOKResp bool, bodyObj interface{}) ([]byte, int, error) {
+func (cli *APIClient) doRequest(entityName string, entityID string, method string, checkOKResp bool, checkNilBody bool, bodyObj interface{}) ([]byte, int, error) {
 	var baseURL *url.URL
 	var err error
 
@@ -68,12 +69,16 @@ func (cli *APIClient) doRequest(entityName string, entityID string, method strin
 	if checkOKResp && (200 > resp.StatusCode || resp.StatusCode > 299) {
 		return nil, 0, fmt.Errorf("got non OK http status from: %s, status: %v, response: %q", req.URL.RequestURI(), resp.StatusCode, string(body))
 	}
+	if checkNilBody && (strings.TrimSpace(string(body)) == "null") {
+		return nil, 0, fmt.Errorf("API returned null response body from: %s, status: %v, response: %q", req.URL.RequestURI(), resp.StatusCode, string(body))
+
+	}
 	return body, resp.StatusCode, nil
 }
 
 func (cli *APIClient) GetConfigWithID(configID string) (*GetConfigResponse, error) {
 	cli.initializeHTTPClient()
-	b, _, err := cli.doRequest("confs", configID, http.MethodGet, true, nil)
+	b, _, err := cli.doRequest("confs", configID, http.MethodGet, true, true, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +91,7 @@ func (cli *APIClient) GetConfigWithID(configID string) (*GetConfigResponse, erro
 
 func (cli *APIClient) CreateConfig(configObject Config) (*CreateConfigResponse, error) {
 	cli.initializeHTTPClient()
-	b, _, err := cli.doRequest("confs", "", http.MethodPost, true, configObject)
+	b, _, err := cli.doRequest("confs", "", http.MethodPost, true, true, configObject)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +104,7 @@ func (cli *APIClient) CreateConfig(configObject Config) (*CreateConfigResponse, 
 
 func (cli *APIClient) UpdateConfigWithID(configID string, configObject Config) (*UpdateConfigResponse, error) {
 	cli.initializeHTTPClient()
-	b, _, err := cli.doRequest("confs", configID, http.MethodPut, true, configObject)
+	b, _, err := cli.doRequest("confs", configID, http.MethodPut, true, true, configObject)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +117,7 @@ func (cli *APIClient) UpdateConfigWithID(configID string, configObject Config) (
 
 func (cli *APIClient) GetMonitorWithID(monitorID string) (*GetMonitorResponse, error) {
 	cli.initializeHTTPClient()
-	b, _, err := cli.doRequest("alert_definitions", monitorID, http.MethodGet, true, nil)
+	b, _, err := cli.doRequest("alert_definitions", monitorID, http.MethodGet, true, true, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +130,7 @@ func (cli *APIClient) GetMonitorWithID(monitorID string) (*GetMonitorResponse, e
 
 func (cli *APIClient) CreateMonitor(monitor Monitor) (*CreateMonitorResponse, error) {
 	cli.initializeHTTPClient()
-	b, _, err := cli.doRequest("alert_definitions", "", http.MethodPost, true, monitor)
+	b, _, err := cli.doRequest("alert_definitions", "", http.MethodPost, true, true, monitor)
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +143,7 @@ func (cli *APIClient) CreateMonitor(monitor Monitor) (*CreateMonitorResponse, er
 
 func (cli *APIClient) UpdateMonitorWithID(monitorID string, monitor Monitor) (*UpdateMonitorResponse, error) {
 	cli.initializeHTTPClient()
-	b, _, err := cli.doRequest("alert_definitions", monitorID, http.MethodPut, true, monitor)
+	b, _, err := cli.doRequest("alert_definitions", monitorID, http.MethodPut, true, true, monitor)
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +156,7 @@ func (cli *APIClient) UpdateMonitorWithID(monitorID string, monitor Monitor) (*U
 
 func (cli *APIClient) DeleteMonitorWithID(monitorID string) error {
 	cli.initializeHTTPClient()
-	_, _, err := cli.doRequest("alert_definitions", monitorID, http.MethodDelete, true, nil)
+	_, _, err := cli.doRequest("alert_definitions", monitorID, http.MethodDelete, true, true, nil)
 	if err != nil {
 		return err
 	}

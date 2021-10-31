@@ -57,6 +57,24 @@ resource "edgedelta_config" "config_with_id" {
 }
 ```
 
+## Importing Existing Configs
+
+You can import your existing config resources to the terraform state using `terraform import` command with a specific config ID. 
+
+- Define a config resource
+```hcl
+resource "edgedelta_config" "imported_config" {
+
+}
+```
+
+- Run `terraform import` on terminal
+```bash
+terraform import edgedelta_config.imported_config <resource-id>
+```
+
+More detailed information about resource imports can be found in [advanced docs](../advanced.md).
+
 ## Schema
 
 | Name           | Description                                                                                                                             | Type   | Default | Required |
