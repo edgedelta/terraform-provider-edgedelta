@@ -188,6 +188,38 @@ The client has a number of functions, the detailed function information can be f
 |CreateMonitor|`monitors`|**monitor**: [Monitor](../edgedelta/types.go)|[*CreateMonitorResponse](../edgedelta/types.go)|
 |UpdateMonitorWithID|`monitors`|**monitorID**: `string` <br><br>  **monitor**: [Monitor](../edgedelta/types.go)|[*UpdateMonitorResponse](../edgedelta/types.go)|
 
+## Running the Provider Locally
+
+### Building
+
+To build and use the provider on your local machine, use the Makefile with the environment variables below:
+
+* `TERRAFORM_PROVIDER_ED_OS_ARCH`: Desired OS architecture. This has to be the arch of your local machine (Ex. darwin_amd64 for 64-bit Macs)
+* `TERRAFORM_PROVIDER_ED_VERSION`: Desired provider version. This has no direct effect on the functionlity of the provider itself, you will use this version number in your `.tf` file later. (Ex. 0.4.2, 1.53.1 etc.)
+
+To build the provider, run the command below:
+
+```bash
+TERRAFORM_PROVIDER_ED_VERSION=<desired-version> TERRAFORM_PROVIDER_ED_OS_ARCH=<desired-arch> make
+```
+
+Then the provider will be built and the binary will be put under `~/.terraform.d/plugins/edgedelta.com/local/edgedelta/${VERSION}/${OS_ARCH}`.
+
+### Using
+
+To test the provider on your local machine, use the name `edgedelta.com/local/edgedelta` for the provider name and the version you have provided in `TERRAFORM_PROVIDER_ED_VERSION` before for the version in your `.tf` file:
+
+```hcl
+terraform {
+  required_providers {
+    edgedelta = {
+      source  = "edgedelta.com/local/edgedelta"
+      version = "0.0.4"   # If you've set TERRAFORM_PROVIDER_ED_VERSION=0.0.4
+    }
+  }
+}
+```
+
 ## Publishing the Provider
 
 You need to follow a number of simple steps to publish the provider. Publishing the provider to Terraform Registry is a pretty straightforward process. The steps described here are mainly taken from [the official Terraform documentation](https://www.terraform.io/docs/registry/providers/publishing.html).

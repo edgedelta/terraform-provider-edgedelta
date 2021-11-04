@@ -1,9 +1,9 @@
 HOSTNAME=edgedelta.com
-NAMESPACE=edgedelta
-NAME=config
+NAMESPACE=local
+NAME=edgedelta
 BINARY=terraform-provider-${NAME}
-VERSION=0.0.1
-OS_ARCH=darwin_amd64
+VERSION=${TERRAFORM_PROVIDER_ED_VERSION}
+OS_ARCH=${TERRAFORM_PROVIDER_ED_OS_ARCH}
 
 default: install
 
@@ -11,8 +11,8 @@ build:
 	go build -o ${BINARY}
 
 install: build
-	mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
-	cp ${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
+	mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${VERSION}/${OS_ARCH}
+	cp ${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${VERSION}/${OS_ARCH}
 	mv ${BINARY} ${GOPATH}/bin
 
 release:
