@@ -26,7 +26,7 @@ For additional agent-related requirements, please see [Pre-Installation Agent Re
 
 ## Step 2: Review Schema Elements
 
-Review following schema elements that you can obtain from Edge Delta.
+Review the following schema elements that you can obtain from Edge Delta.
 
 > **Note**
 > 
@@ -75,7 +75,7 @@ Edge Delta recommends that you set the `api_secret` through an environment varia
 
 ## Review Sample Usage 
 
-Review the following simple usage: 
+Review the following sample usage: 
 
 > **Note**
 > 
