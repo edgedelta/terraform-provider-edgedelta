@@ -1,8 +1,8 @@
 terraform {
     required_providers {
             edgedelta = {
-            source  = "edgedelta.com/edgedelta/config"
-            version = "0.0.1"
+            source  = "edgedelta/edgedelta"
+            version = "0.0.4"
         }
     }
 }
