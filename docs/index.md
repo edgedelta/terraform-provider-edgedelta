@@ -76,12 +76,35 @@ Edge Delta recommends that you set the `api_secret` through an environment varia
 ## Step 4: Create a Resource Definition 
 
 Create a resource definition for **edgedelta_config** or **edgedelta_monitor** in the **.tf** file.
+  * The **edgedelta_config** resource allows you to manage your Edge Delta configurations.
+  * The **edgedelta_monitor** resource allows you to manage your Edge Delta alert definitons (monitors). 
 
-The **edgedelta_config** resource allows you to manage your Edge Delta configurations.
+***
+
+### Option 1: Create a Resource Definition for edgedelta_config
+
+To learn how to create a resource definition for **edgedelta_config**, review the following example: 
+
+
+
+
+
+
   * To learn more, see [edgedelta_config (Resource)](resources/config.md).
 
-The **edgedelta_monitor** resource allows you to manage your Edge Delta alert definitons (monitors). 
-  * To learn more, see [edgedelta_monitor (Resource)](resources/monitor.md).
+***
+
+### Option 2: Create a Resource Definition for edgedelta_monitor
+
+To learn how to create a resource definition for **edgedelta_monitor**, review the following example: 
+
+
+
+
+
+
+
+* To learn more, see [edgedelta_monitor (Resource)](resources/monitor.md).
 
 ***
 
