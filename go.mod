@@ -2,7 +2,10 @@ module terraform-provider-edgedelta
 
 go 1.17
 
-require github.com/hashicorp/terraform-plugin-sdk/v2 v2.7.1
+require (
+	github.com/google/uuid v1.1.2
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.7.1
+)
 
 require (
 	github.com/agext/levenshtein v1.2.2 // indirect
