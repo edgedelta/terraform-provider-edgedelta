@@ -10,7 +10,14 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
+
+func validateUUID(val string) bool {
+	_, err := uuid.Parse(val)
+	return err == nil
+}
 
 type APIClient struct {
 	OrgID      string
@@ -77,6 +84,9 @@ func (cli *APIClient) doRequest(entityName string, entityID string, method strin
 }
 
 func (cli *APIClient) GetConfigWithID(configID string) (*GetConfigResponse, error) {
+	if ok := validateUUID(configID); !ok {
+		return nil, fmt.Errorf("failed to validate the config ID: '%s'", configID)
+	}
 	cli.initializeHTTPClient()
 	b, _, err := cli.doRequest("confs", configID, http.MethodGet, true, true, nil)
 	if err != nil {
@@ -103,6 +113,9 @@ func (cli *APIClient) CreateConfig(configObject Config) (*CreateConfigResponse, 
 }
 
 func (cli *APIClient) UpdateConfigWithID(configID string, configObject Config) (*UpdateConfigResponse, error) {
+	if ok := validateUUID(configID); !ok {
+		return nil, fmt.Errorf("failed to validate the config ID: '%s'", configID)
+	}
 	cli.initializeHTTPClient()
 	b, _, err := cli.doRequest("confs", configID, http.MethodPut, true, true, configObject)
 	if err != nil {
@@ -116,6 +129,9 @@ func (cli *APIClient) UpdateConfigWithID(configID string, configObject Config) (
 }
 
 func (cli *APIClient) GetMonitorWithID(monitorID string) (*GetMonitorResponse, error) {
+	if ok := validateUUID(monitorID); !ok {
+		return nil, fmt.Errorf("failed to validate the monitor ID: '%s'", monitorID)
+	}
 	cli.initializeHTTPClient()
 	b, _, err := cli.doRequest("alert_definitions", monitorID, http.MethodGet, true, true, nil)
 	if err != nil {
@@ -142,6 +158,9 @@ func (cli *APIClient) CreateMonitor(monitor Monitor) (*CreateMonitorResponse, er
 }
 
 func (cli *APIClient) UpdateMonitorWithID(monitorID string, monitor Monitor) (*UpdateMonitorResponse, error) {
+	if ok := validateUUID(monitorID); !ok {
+		return nil, fmt.Errorf("failed to validate the monitor ID: '%s'", monitorID)
+	}
 	cli.initializeHTTPClient()
 	b, _, err := cli.doRequest("alert_definitions", monitorID, http.MethodPut, true, true, monitor)
 	if err != nil {
@@ -155,6 +174,9 @@ func (cli *APIClient) UpdateMonitorWithID(monitorID string, monitor Monitor) (*U
 }
 
 func (cli *APIClient) DeleteMonitorWithID(monitorID string) error {
+	if ok := validateUUID(monitorID); !ok {
+		return fmt.Errorf("failed to validate the monitor ID: '%s'", monitorID)
+	}
 	cli.initializeHTTPClient()
 	_, _, err := cli.doRequest("alert_definitions", monitorID, http.MethodDelete, true, true, nil)
 	if err != nil {
