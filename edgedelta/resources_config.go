@@ -3,6 +3,7 @@ package edgedelta
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -39,17 +40,45 @@ func resourceConfig() *schema.Resource {
 				meta := m.(*ProviderMetadata)
 				confID := d.Id()
 				if confID == "" { // confID DNE
-					return nil, fmt.Errorf("Could not determine the resource ID - possibly the ID was not set")
+					return nil, fmt.Errorf("could not determine the resource ID - possibly the ID was not set")
 				}
-				resp, err := meta.client.GetConfigWithID(confID)
-				if err != nil {
-					return nil, fmt.Errorf("Could not get the resource data from API: %s (resource ID was: '%s')", err, confID)
+				var confIDs []string
+				if confID == "*" {
+					confs, err := meta.client.GetAllConfigs()
+					if err != nil {
+						return nil, fmt.Errorf("could not get the configs from API: %s", err)
+					}
+					results := make([]*schema.ResourceData, 0, len(confs))
+					for _, c := range confs {
+						dd := resourceConfig().Data(nil)
+						dd.SetId(c.ID)
+						dd.Set("conf_id", c.ID)
+						dd.Set("tag", c.Tag)
+						dd.Set("org_id", c.OrgID)
+						dd.Set("config_content", c.Content)
+						results = append(results, dd)
+					}
+					return results, nil
+				} else if strings.Contains(confID, ",") {
+					confIDs = strings.Split(confID, ",")
+				} else {
+					confIDs = []string{confID}
 				}
-				d.SetId(resp.ID)
-				d.Set("conf_id", confID)
-				d.Set("org_id", resp.OrgID)
-				d.Set("tag", resp.Tag)
-				return []*schema.ResourceData{d}, nil
+				results := make([]*schema.ResourceData, 0, len(confIDs))
+				for _, id := range confIDs {
+					dd := resourceConfig().Data(nil)
+					resp, err := meta.client.GetConfigWithID(id)
+					if err != nil {
+						return nil, fmt.Errorf("could not get the resource data from API: %s (resource ID was: '%s')", err, id)
+					}
+					dd.SetId(resp.ID)
+					dd.Set("conf_id", id)
+					dd.Set("tag", resp.Tag)
+					dd.Set("org_id", resp.OrgID)
+					dd.Set("config_content", resp.Content)
+					results = append(results, dd)
+				}
+				return results, nil
 			},
 		},
 	}
@@ -83,8 +112,7 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	if len(diags) > 0 {
 		return diags
 	}
-	var confDataObj Config
-	confDataObj = Config{
+	confDataObj := Config{
 		Content: confData,
 	}
 	if confID == "" {
@@ -169,8 +197,7 @@ func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		// Just get the config id from the tf state
 		confID = d.Id()
 	}
-	var confDataObj Config
-	confDataObj = Config{
+	confDataObj := Config{
 		Content: confData,
 	}
 	_, err := meta.client.UpdateConfigWithID(confID, confDataObj)
