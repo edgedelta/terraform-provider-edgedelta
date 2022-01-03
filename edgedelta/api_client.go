@@ -67,7 +67,7 @@ func (cli *APIClient) doRequest(entityName string, entityID string, method strin
 		return nil, 0, fmt.Errorf("failed to read response body from '%s'. err: %v", req.URL.RequestURI(), err)
 	}
 	if checkOKResp && (200 > resp.StatusCode || resp.StatusCode > 299) {
-		return nil, 0, fmt.Errorf("got non OK http status from: %s, status: %v, response: %q", req.URL.RequestURI(), resp.StatusCode, string(body))
+		return nil, 0, fmt.Errorf("got non OK http status from: %s %s, status: %v, response: %q", req.Method, req.URL.RequestURI(), resp.StatusCode, string(body))
 	}
 	if checkNilBody && (strings.TrimSpace(string(body)) == "null") {
 		return nil, 0, fmt.Errorf("API returned null response body from: %s, status: %v, response: %q", req.URL.RequestURI(), resp.StatusCode, string(body))
@@ -87,6 +87,19 @@ func (cli *APIClient) GetConfigWithID(configID string) (*GetConfigResponse, erro
 		return nil, fmt.Errorf("failed to unmarshal the response body: %s", err)
 	}
 	return &responseData, nil
+}
+
+func (cli *APIClient) GetAllConfigs() ([]*Config, error) {
+	cli.initializeHTTPClient()
+	b, _, err := cli.doRequest("confs", "", http.MethodGet, true, true, nil)
+	if err != nil {
+		return nil, err
+	}
+	var responseData []*Config
+	if err := json.Unmarshal(b, &responseData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal the response body: %s", err)
+	}
+	return responseData, nil
 }
 
 func (cli *APIClient) CreateConfig(configObject Config) (*CreateConfigResponse, error) {
@@ -126,6 +139,19 @@ func (cli *APIClient) GetMonitorWithID(monitorID string) (*GetMonitorResponse, e
 		return nil, fmt.Errorf("failed to unmarshal the response body: %s", err)
 	}
 	return &responseData, nil
+}
+
+func (cli *APIClient) GetAllMonitors() ([]*Monitor, error) {
+	cli.initializeHTTPClient()
+	b, _, err := cli.doRequest("alert_definitions", "", http.MethodGet, true, true, nil)
+	if err != nil {
+		return nil, err
+	}
+	var responseData []*Monitor
+	if err := json.Unmarshal(b, &responseData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal the response body: %s", err)
+	}
+	return responseData, nil
 }
 
 func (cli *APIClient) CreateMonitor(monitor Monitor) (*CreateMonitorResponse, error) {
