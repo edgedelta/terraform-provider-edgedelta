@@ -3,6 +3,7 @@ package edgedelta
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -73,21 +74,51 @@ func resourceMonitor() *schema.Resource {
 				meta := m.(*ProviderMetadata)
 				monitorID := d.Id()
 				if monitorID == "" { // monitorID DNE
-					return nil, fmt.Errorf("Could not determine the resource ID - possibly the ID was not set")
+					return nil, fmt.Errorf("could not determine the resource ID - possibly the ID was not set")
 				}
-				resp, err := meta.client.GetMonitorWithID(monitorID)
-				if err != nil {
-					return nil, fmt.Errorf("Could not get the resource data from API: %s (resource ID was: '%s')", err, monitorID)
+				var monitorIDs []string
+				if monitorID == "*" {
+					monitors, err := meta.client.GetAllMonitors()
+					if err != nil {
+						return nil, fmt.Errorf("could not get the monitors from API: %s", err)
+					}
+					results := make([]*schema.ResourceData, 0, len(monitors))
+					for _, m := range monitors {
+						dd := resourceMonitor().Data(nil)
+						dd.SetId(m.ID)
+						dd.Set("name", m.Name)
+						dd.Set("type", m.Type)
+						dd.Set("org_id", m.OrgID)
+						dd.Set("monitor_id", m.ID)
+						dd.Set("enabled", m.Enabled)
+						dd.Set("payload", m.Payload)
+						dd.Set("creator", m.Creator)
+						results = append(results, dd)
+					}
+					return results, nil
+				} else if strings.Contains(monitorID, ",") {
+					monitorIDs = strings.Split(monitorID, ",")
+				} else {
+					monitorIDs = []string{monitorID}
 				}
-				d.SetId(resp.ID)
-				d.Set("monitor_id", monitorID)
-				d.Set("org_id", resp.OrgID)
-				d.Set("name", resp.Name)
-				d.Set("type", resp.Type)
-				d.Set("enabled", resp.Enabled)
-				d.Set("payload", resp.Payload)
-				d.Set("creator", resp.Creator)
-				return []*schema.ResourceData{d}, nil
+				results := make([]*schema.ResourceData, 0, len(monitorIDs))
+				for _, id := range monitorIDs {
+					dd := resourceMonitor().Data(nil)
+					resp, err := meta.client.GetMonitorWithID(id)
+					if err != nil {
+						return nil, fmt.Errorf("could not get the resource data from API: %s (resource ID was: '%s')", err, id)
+					}
+					dd.SetId(resp.ID)
+					dd.Set("monitor_id", id)
+					dd.Set("name", resp.Name)
+					dd.Set("type", resp.Type)
+					dd.Set("org_id", resp.OrgID)
+					dd.Set("enabled", resp.Enabled)
+					dd.Set("payload", resp.Payload)
+					dd.Set("creator", resp.Creator)
+					results = append(results, dd)
+				}
+				return results, nil
 			},
 		},
 	}
