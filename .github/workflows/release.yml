@@ -12,8 +12,6 @@
 name: release
 on:
   push:
-    branches:
-      - ozansz/fix-goreleaser-win-arm64-issue
     tags:
       - 'v*'
 jobs:
