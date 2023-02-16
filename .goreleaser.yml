@@ -28,6 +28,8 @@ builds:
   ignore:
     - goos: darwin
       goarch: '386'
+    - goos: windows
+      goarch: arm64
   binary: '{{ .ProjectName }}_v{{ .Version }}'
 archives:
 - format: zip
@@ -49,6 +51,7 @@ signs:
       - "${artifact}"
 release:
   # If you want to manually examine the release before its live, uncomment this line:
-  # draft: true
+  ## TODO: REMOVE
+  draft: true
 changelog:
   skip: true
