@@ -1,11 +1,14 @@
 package edgedelta
 
 type Config struct {
-	Content     string `json:"content"`
-	Description string `json:"description"`
-	ID          string `json:"id"`
-	OrgID       string `json:"orgID"`
-	Tag         string `json:"tag"`
+	Content      string `json:"content"`
+	Description  string `json:"description"`
+	ID           string `json:"id"`
+	OrgID        string `json:"orgID"`
+	Tag          string `json:"tag"`
+	Environment  string `json:"environment,omitempty"`
+	FleetType    string `json:"fleet_type,omitempty"`
+	FleetSubtype string `json:"fleet_subtype,omitempty"`
 }
 
 type GetConfigResponse Config

@@ -3,6 +3,7 @@ package edgedelta
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -28,6 +29,24 @@ func resourceConfig() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Unique configuration ID",
+			},
+			"environment": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "Linux",
+				Description: "Environment type (Kubernetes, Linux, Windows, MacOS, Docker, Helm)",
+			},
+			"fleet_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "Edge",
+				Description: "Fleet type (Edge, Cloud, Gateway)",
+			},
+			"fleet_subtype": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "Fleet subtype (Edge, Coordinator, Gateway) - required when environment is Kubernetes",
 			},
 			// Computed
 			"tag": {
@@ -84,6 +103,17 @@ func resourceConfig() *schema.Resource {
 	}
 }
 
+// extractTagFromYAML attempts to extract the tag value from the YAML content
+func extractTagFromYAML(content string) string {
+	// Try to find tag in settings section (v3 format)
+	re := regexp.MustCompile(`(?m)^\s*tag:\s*(.+)$`)
+	matches := re.FindStringSubmatch(content)
+	if len(matches) > 1 {
+		return strings.TrimSpace(matches[1])
+	}
+	return ""
+}
+
 func parseArgs(d *schema.ResourceData) (confID string, confData string, diags diag.Diagnostics) {
 	confIDRaw := d.Get("conf_id")
 	configDataRaw := d.Get("config_content")
@@ -112,8 +142,26 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	if len(diags) > 0 {
 		return diags
 	}
+	
+	// Get the optional environment and fleet configuration
+	environment := d.Get("environment").(string)
+	fleetType := d.Get("fleet_type").(string)
+	fleetSubtype := d.Get("fleet_subtype").(string)
+	
+	// Validate: fleet_subtype is required when environment is Kubernetes
+	if environment == "Kubernetes" && fleetSubtype == "" {
+		fleetSubtype = "Edge" // Default to Edge for Kubernetes
+	}
+	
+	// Extract tag from YAML content
+	tag := extractTagFromYAML(confData)
+	
 	confDataObj := Config{
-		Content: confData,
+		Content:      confData,
+		Tag:          tag,
+		Environment:  environment,
+		FleetType:    fleetType,
+		FleetSubtype: fleetSubtype,
 	}
 	if confID == "" {
 		// Create a new config
@@ -133,7 +181,11 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	} else {
 		// First run of the terraform config, just update the existing ed-config
-		apiResp, err := meta.client.UpdateConfigWithID(confID, confDataObj)
+		// Note: For updates, we don't send environment/fleet fields as they can't be changed
+		updateObj := Config{
+			Content: confData,
+		}
+		apiResp, err := meta.client.UpdateConfigWithID(confID, updateObj)
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
