@@ -412,5 +412,36 @@ func resourceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 }
 
 func resourceConfigDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	return diag.Diagnostics{}
+	meta := m.(*ProviderMetadata)
+	args := parseArgs(d)
+	if len(args.diags) > 0 {
+		return args.diags
+	}
+
+	confID := args.confID
+	if confID == "" {
+		// Just get the config id from the tf state
+		confID = d.Id()
+	}
+
+	if confID == "" {
+		args.diags = append(args.diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Cannot determine config ID for deletion",
+			Detail:   "Config ID is required but not found in Terraform state",
+		})
+		return args.diags
+	}
+
+	err := meta.client.DeleteConfigWithID(confID)
+	if err != nil {
+		args.diags = append(args.diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Could not delete the config resource",
+			Detail:   fmt.Sprintf("%s", err),
+		})
+		return args.diags
+	}
+
+	return args.diags
 }
