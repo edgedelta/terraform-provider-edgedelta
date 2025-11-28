@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -69,7 +68,7 @@ func (cli *APIClient) doRequest(entityName string, entityID string, method strin
 		return nil, 0, fmt.Errorf("failed to do '%s %s'. error: %v", req.Method, req.URL.RequestURI(), err)
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to read response body from '%s'. err: %v", req.URL.RequestURI(), err)
 	}
@@ -139,6 +138,58 @@ func (cli *APIClient) UpdateConfigWithID(configID string, configObject Config) (
 		return nil, fmt.Errorf("failed to unmarshal the response body: %s", err)
 	}
 	return &responseData, nil
+}
+
+func (cli *APIClient) SaveConfig(configID string, saveReq SaveRequest) (*SaveConfigResponse, error) {
+	if ok := validateUUID(configID); !ok {
+		return nil, fmt.Errorf("failed to validate the config ID: '%s'", configID)
+	}
+	cli.initializeHTTPClient()
+	b, _, err := cli.doRequest("pipelines", fmt.Sprintf("%s/save", configID), http.MethodPost, true, true, saveReq)
+	if err != nil {
+		return nil, err
+	}
+	var responseData SaveConfigResponse
+	if err := json.Unmarshal(b, &responseData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal the response body: %s", err)
+	}
+	return &responseData, nil
+}
+
+func (cli *APIClient) DeployConfig(configID string, version int64) (*DeployConfigResponse, error) {
+	if ok := validateUUID(configID); !ok {
+		return nil, fmt.Errorf("failed to validate the config ID: '%s'", configID)
+	}
+	cli.initializeHTTPClient()
+	b, _, err := cli.doRequest("pipelines", fmt.Sprintf("%s/deploy/%d", configID, version), http.MethodPost, true, true, nil)
+	if err != nil {
+		return nil, err
+	}
+	var responseData DeployConfigResponse
+	if err := json.Unmarshal(b, &responseData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal the response body: %s", err)
+	}
+	return &responseData, nil
+}
+
+func (cli *APIClient) GetLatestConfigHistoryVersion(configID string) (int64, error) {
+	if ok := validateUUID(configID); !ok {
+		return 0, fmt.Errorf("failed to validate the config ID: '%s'", configID)
+	}
+	cli.initializeHTTPClient()
+	b, _, err := cli.doRequest("pipelines", fmt.Sprintf("%s/history", configID), http.MethodGet, true, true, nil)
+	if err != nil {
+		return 0, err
+	}
+	var histories []ConfigHistory
+	if err := json.Unmarshal(b, &histories); err != nil {
+		return 0, fmt.Errorf("failed to unmarshal the response body: %s", err)
+	}
+	if len(histories) == 0 {
+		return 0, fmt.Errorf("no config history found for config ID: '%s'", configID)
+	}
+	// The backend returns histories sorted by timestamp descending, so the first entry is the latest
+	return histories[0].Timestamp, nil
 }
 
 func (cli *APIClient) GetMonitorWithID(monitorID string) (*GetMonitorResponse, error) {
