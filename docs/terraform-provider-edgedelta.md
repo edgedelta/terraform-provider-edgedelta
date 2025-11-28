@@ -160,7 +160,7 @@ An example schema from the [edgedelta_config](../edgedelta/resources_config.go) 
 
 #### CRUD Functions
 
-Every resource has 4 functions to control the resource state: create, read, update and delete. These functions are provided to the resource struct with the fields respectively `CreateContext`, `ReadContext`, `UpdateContext` and `DeleteContext`. Each function takes 3 arguments: `context` (`context.Context`), `data` (`*schema.ResourceData`) and `metadata` (`interface{}` in general, or `*ProviderMetadata` in our implementation). The create and read functions should set the parameter values in the `data` argument. These values are beging used to update the Terraform state. 
+Every resource has 4 functions to control the resource state: create, read, update and delete. These functions are provided to the resource struct with the fields respectively `CreateContext`, `ReadContext`, `UpdateContext` and `DeleteContext`. Each function takes 3 arguments: `context` (`context.Context`), `data` (`*schema.ResourceData`) and `metadata` (`interface{}` in general, or `*ProviderMetadata` in our implementation). The create and read functions should set the parameter values in the `data` argument. These values are beging used to update the Terraform state.
 
 ### API Client
 
@@ -214,7 +214,7 @@ terraform {
   required_providers {
     edgedelta = {
       source  = "edgedelta.com/local/edgedelta"
-      version = "0.0.6"   # If you've set TERRAFORM_PROVIDER_ED_VERSION=0.0.6
+      version = "0.0.7"   # If you've set TERRAFORM_PROVIDER_ED_VERSION=0.0.7
     }
   }
 }
