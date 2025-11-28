@@ -192,6 +192,18 @@ func (cli *APIClient) GetLatestConfigHistoryVersion(configID string) (int64, err
 	return histories[0].Timestamp, nil
 }
 
+func (cli *APIClient) DeleteConfigWithID(configID string) error {
+	if ok := validateUUID(configID); !ok {
+		return fmt.Errorf("failed to validate the config ID: '%s'", configID)
+	}
+	cli.initializeHTTPClient()
+	_, _, err := cli.doRequest("confs", configID, http.MethodDelete, true, true, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (cli *APIClient) GetMonitorWithID(monitorID string) (*GetMonitorResponse, error) {
 	if ok := validateUUID(monitorID); !ok {
 		return nil, fmt.Errorf("failed to validate the monitor ID: '%s'", monitorID)
