@@ -140,10 +140,15 @@ func resourceConfig() *schema.Resource {
 					for _, c := range confs {
 						dd := resourceConfig().Data(nil)
 						dd.SetId(c.ID)
-						dd.Set("conf_id", c.ID)
-						dd.Set("tag", c.Tag)
-						dd.Set("org_id", c.OrgID)
-						dd.Set("config_content", c.Content)
+						if err := dd.Set("conf_id", c.ID); err != nil {
+							return nil, fmt.Errorf("failed to set conf_id: %s", err)
+						}
+						if err := dd.Set("tag", c.Tag); err != nil {
+							return nil, fmt.Errorf("failed to set tag: %s", err)
+						}
+						if err := dd.Set("config_content", c.Content); err != nil {
+							return nil, fmt.Errorf("failed to set config_content: %s", err)
+						}
 						results = append(results, dd)
 					}
 					return results, nil
@@ -160,10 +165,15 @@ func resourceConfig() *schema.Resource {
 						return nil, fmt.Errorf("could not get the resource data from API: %s (resource ID was: '%s')", err, id)
 					}
 					dd.SetId(resp.ID)
-					dd.Set("conf_id", id)
-					dd.Set("tag", resp.Tag)
-					dd.Set("org_id", resp.OrgID)
-					dd.Set("config_content", resp.Content)
+					if err := dd.Set("conf_id", id); err != nil {
+						return nil, fmt.Errorf("failed to set conf_id: %s", err)
+					}
+					if err := dd.Set("tag", resp.Tag); err != nil {
+						return nil, fmt.Errorf("failed to set tag: %s", err)
+					}
+					if err := dd.Set("config_content", resp.Content); err != nil {
+						return nil, fmt.Errorf("failed to set config_content: %s", err)
+					}
 					results = append(results, dd)
 				}
 				return results, nil
@@ -234,6 +244,17 @@ func parseArgs(d *schema.ResourceData) *configArgs {
 	return args
 }
 
+func setWithError(d *schema.ResourceData, key string, value any, diags diag.Diagnostics) diag.Diagnostics {
+	if err := d.Set(key, value); err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  fmt.Sprintf("Failed to set %s in state", key),
+			Detail:   fmt.Sprintf("%s", err),
+		})
+	}
+	return diags
+}
+
 func saveAndDeployConfig(client APIClient, confID string, saveReq SaveRequest, autoDeploy bool, errorContext string) (*SaveConfigResponse, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -302,9 +323,8 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 			return args.diags
 		}
 		d.SetId(apiResp.ID)
-		d.Set("conf_id", args.confID)
-		d.Set("org_id", apiResp.OrgID)
-		d.Set("tag", apiResp.Tag)
+		args.diags = setWithError(d, "conf_id", args.confID, args.diags)
+		args.diags = setWithError(d, "tag", apiResp.Tag, args.diags)
 
 	} else {
 		// First run of the terraform config, save the existing ed-config
@@ -319,12 +339,11 @@ func resourceConfigCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		}
 
 		d.SetId(saveResp.ID)
-		d.Set("conf_id", saveResp.ID)
-		// Get the full config to get org_id and tag
+		args.diags = setWithError(d, "conf_id", saveResp.ID, args.diags)
+		// Get the full config to get tag
 		configResp, err := meta.client.GetConfigWithID(args.confID)
 		if err == nil {
-			d.Set("org_id", configResp.OrgID)
-			d.Set("tag", configResp.Tag)
+			args.diags = setWithError(d, "tag", configResp.Tag, args.diags)
 		}
 	}
 
@@ -360,9 +379,8 @@ func resourceConfigRead(ctx context.Context, d *schema.ResourceData, m interface
 		return args.diags
 	}
 	d.SetId(apiResp.ID)
-	d.Set("conf_id", args.confID)
-	d.Set("org_id", apiResp.OrgID)
-	d.Set("tag", apiResp.Tag)
+	args.diags = setWithError(d, "conf_id", args.confID, args.diags)
+	args.diags = setWithError(d, "tag", apiResp.Tag, args.diags)
 
 	return args.diags
 }

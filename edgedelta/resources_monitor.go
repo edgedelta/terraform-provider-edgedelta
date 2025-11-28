@@ -86,13 +86,24 @@ func resourceMonitor() *schema.Resource {
 					for _, m := range monitors {
 						dd := resourceMonitor().Data(nil)
 						dd.SetId(m.ID)
-						dd.Set("name", m.Name)
-						dd.Set("type", m.Type)
-						dd.Set("org_id", m.OrgID)
-						dd.Set("monitor_id", m.ID)
-						dd.Set("enabled", m.Enabled)
-						dd.Set("payload", m.Payload)
-						dd.Set("creator", m.Creator)
+						if err := dd.Set("name", m.Name); err != nil {
+							return nil, fmt.Errorf("failed to set name: %s", err)
+						}
+						if err := dd.Set("type", m.Type); err != nil {
+							return nil, fmt.Errorf("failed to set type: %s", err)
+						}
+						if err := dd.Set("monitor_id", m.ID); err != nil {
+							return nil, fmt.Errorf("failed to set monitor_id: %s", err)
+						}
+						if err := dd.Set("enabled", m.Enabled); err != nil {
+							return nil, fmt.Errorf("failed to set enabled: %s", err)
+						}
+						if err := dd.Set("payload", m.Payload); err != nil {
+							return nil, fmt.Errorf("failed to set payload: %s", err)
+						}
+						if err := dd.Set("creator", m.Creator); err != nil {
+							return nil, fmt.Errorf("failed to set creator: %s", err)
+						}
 						results = append(results, dd)
 					}
 					return results, nil
@@ -109,13 +120,24 @@ func resourceMonitor() *schema.Resource {
 						return nil, fmt.Errorf("could not get the resource data from API: %s (resource ID was: '%s')", err, id)
 					}
 					dd.SetId(resp.ID)
-					dd.Set("monitor_id", id)
-					dd.Set("name", resp.Name)
-					dd.Set("type", resp.Type)
-					dd.Set("org_id", resp.OrgID)
-					dd.Set("enabled", resp.Enabled)
-					dd.Set("payload", resp.Payload)
-					dd.Set("creator", resp.Creator)
+					if err := dd.Set("monitor_id", id); err != nil {
+						return nil, fmt.Errorf("failed to set monitor_id: %s", err)
+					}
+					if err := dd.Set("name", resp.Name); err != nil {
+						return nil, fmt.Errorf("failed to set name: %s", err)
+					}
+					if err := dd.Set("type", resp.Type); err != nil {
+						return nil, fmt.Errorf("failed to set type: %s", err)
+					}
+					if err := dd.Set("enabled", resp.Enabled); err != nil {
+						return nil, fmt.Errorf("failed to set enabled: %s", err)
+					}
+					if err := dd.Set("payload", resp.Payload); err != nil {
+						return nil, fmt.Errorf("failed to set payload: %s", err)
+					}
+					if err := dd.Set("creator", resp.Creator); err != nil {
+						return nil, fmt.Errorf("failed to set creator: %s", err)
+					}
 					results = append(results, dd)
 				}
 				return results, nil
@@ -207,13 +229,12 @@ func resourceMonitorCreate(ctx context.Context, d *schema.ResourceData, m interf
 			return diags
 		}
 		d.SetId(resp.ID)
-		d.Set("monitor_id", monitorID)
-		d.Set("org_id", resp.OrgID)
-		d.Set("name", resp.Name)
-		d.Set("type", resp.Type)
-		d.Set("enabled", resp.Enabled)
-		d.Set("payload", resp.Payload)
-		d.Set("creator", resp.Creator)
+		diags = setWithError(d, "monitor_id", monitorID, diags)
+		diags = setWithError(d, "name", resp.Name, diags)
+		diags = setWithError(d, "type", resp.Type, diags)
+		diags = setWithError(d, "enabled", resp.Enabled, diags)
+		diags = setWithError(d, "payload", resp.Payload, diags)
+		diags = setWithError(d, "creator", resp.Creator, diags)
 	} else {
 		// First run of the terraform apply, just update the existing monitor
 		resp, err := meta.client.UpdateMonitorWithID(monitorID, mon)
@@ -226,12 +247,11 @@ func resourceMonitorCreate(ctx context.Context, d *schema.ResourceData, m interf
 			return diags
 		}
 		d.SetId(resp.ID)
-		d.Set("monitor_id", resp.ID)
-		d.Set("org_id", resp.OrgID)
-		d.Set("name", resp.Name)
-		d.Set("type", resp.Type)
-		d.Set("enabled", resp.Enabled)
-		d.Set("payload", resp.Payload)
+		diags = setWithError(d, "monitor_id", resp.ID, diags)
+		diags = setWithError(d, "name", resp.Name, diags)
+		diags = setWithError(d, "type", resp.Type, diags)
+		diags = setWithError(d, "enabled", resp.Enabled, diags)
+		diags = setWithError(d, "payload", resp.Payload, diags)
 	}
 	return diags
 }
@@ -264,13 +284,12 @@ func resourceMonitorRead(ctx context.Context, d *schema.ResourceData, m interfac
 		return diags
 	}
 	d.SetId(resp.ID)
-	d.Set("monitor_id", monitorID)
-	d.Set("org_id", resp.OrgID)
-	d.Set("name", resp.Name)
-	d.Set("type", resp.Type)
-	d.Set("enabled", resp.Enabled)
-	d.Set("payload", resp.Payload)
-	d.Set("creator", resp.Creator)
+	diags = setWithError(d, "monitor_id", monitorID, diags)
+	diags = setWithError(d, "name", resp.Name, diags)
+	diags = setWithError(d, "type", resp.Type, diags)
+	diags = setWithError(d, "enabled", resp.Enabled, diags)
+	diags = setWithError(d, "payload", resp.Payload, diags)
+	diags = setWithError(d, "creator", resp.Creator, diags)
 	return diags
 }
 
