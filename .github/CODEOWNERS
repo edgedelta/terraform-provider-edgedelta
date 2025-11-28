@@ -1,0 +1,22 @@
+# This is a comment.
+# Each line is a file pattern followed by one or more owners.
+# Order is important; the last matching pattern takes the most
+# precedence.
+
+
+# Fallback on any other change if no other pattern matches below.
+*                       fatih@edgedelta.com ozgur@edgedelta.com tuncer@edgedelta.com
+
+# Agent changes:
+/docs/                                                 @edgedelta/pipeline
+/edgedelta/                                            @edgedelta/pipeline
+/examples/                                             @edgedelta/pipeline
+
+# CICD changes:
+/.github/CODEOWNERS     fatih@edgedelta.com ozgur@edgedelta.com
+/.github/workflows/     @edgedelta/developers
+.goreleaser.yml         @edgedelta/developers
+Makefile                @edgedelta/developers
+go.mod                  @edgedelta/pipeline
+go.sum                  @edgedelta/pipeline
+main.go                 @edgedelta/pipeline
