@@ -2,7 +2,7 @@ terraform {
   required_providers {
     edgedelta = {
       source  = "edgedelta/edgedelta"
-      version = "0.0.8"
+      version = "0.0.9"
     }
   }
 }
