@@ -205,3 +205,80 @@ func (cli *APIClient) DeleteConfigWithID(configID string) error {
 	}
 	return nil
 }
+
+// Dashboard API methods
+
+// GetDashboard retrieves a single dashboard by ID
+func (cli *APIClient) GetDashboard(dashboardID string) (*GetDashboardResponse, error) {
+	if ok := validateUUID(dashboardID); !ok {
+		return nil, fmt.Errorf("failed to validate the dashboard ID: '%s'", dashboardID)
+	}
+	cli.initializeHTTPClient()
+	b, _, err := cli.doRequest("dashboards", dashboardID, http.MethodGet, true, true, nil)
+	if err != nil {
+		return nil, err
+	}
+	var responseData GetDashboardResponse
+	if err := json.Unmarshal(b, &responseData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal the response body: %s", err)
+	}
+	return &responseData, nil
+}
+
+// GetAllDashboards retrieves all dashboards for the organization (used for import)
+func (cli *APIClient) GetAllDashboards() ([]*Dashboard, error) {
+	cli.initializeHTTPClient()
+	b, _, err := cli.doRequest("dashboards", "", http.MethodGet, true, true, nil)
+	if err != nil {
+		return nil, err
+	}
+	var responseData []*Dashboard
+	if err := json.Unmarshal(b, &responseData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal the response body: %s", err)
+	}
+	return responseData, nil
+}
+
+// CreateDashboard creates a new dashboard
+func (cli *APIClient) CreateDashboard(dashboard *Dashboard) (*CreateDashboardResponse, error) {
+	cli.initializeHTTPClient()
+	b, _, err := cli.doRequest("dashboards", "", http.MethodPost, true, true, dashboard)
+	if err != nil {
+		return nil, err
+	}
+	var responseData CreateDashboardResponse
+	if err := json.Unmarshal(b, &responseData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal the response body: %s", err)
+	}
+	return &responseData, nil
+}
+
+// UpdateDashboard updates an existing dashboard
+func (cli *APIClient) UpdateDashboard(dashboardID string, dashboard *Dashboard) (*UpdateDashboardResponse, error) {
+	if ok := validateUUID(dashboardID); !ok {
+		return nil, fmt.Errorf("failed to validate the dashboard ID: '%s'", dashboardID)
+	}
+	cli.initializeHTTPClient()
+	b, _, err := cli.doRequest("dashboards", dashboardID, http.MethodPut, true, true, dashboard)
+	if err != nil {
+		return nil, err
+	}
+	var responseData UpdateDashboardResponse
+	if err := json.Unmarshal(b, &responseData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal the response body: %s", err)
+	}
+	return &responseData, nil
+}
+
+// DeleteDashboard deletes a dashboard by ID
+func (cli *APIClient) DeleteDashboard(dashboardID string) error {
+	if ok := validateUUID(dashboardID); !ok {
+		return fmt.Errorf("failed to validate the dashboard ID: '%s'", dashboardID)
+	}
+	cli.initializeHTTPClient()
+	_, _, err := cli.doRequest("dashboards", dashboardID, http.MethodDelete, true, false, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}

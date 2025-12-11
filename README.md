@@ -35,7 +35,23 @@ provider "edgedelta" {
 resource "edgedelta_config" "bare_minimum" {
   config_content     = file("/path/to/the/agent/configuration/file.yml")
 }
+
+# Dashboard example
+resource "edgedelta_dashboard" "monitoring" {
+  dashboard_name = "Infrastructure Monitoring"
+  description    = "Main monitoring dashboard"
+  tags           = ["infrastructure", "monitoring"]
+
+  definition = file("/path/to/dashboard.json")
+}
 ```
+
+## Available Resources
+
+| Resource | Description |
+|----------|-------------|
+| `edgedelta_config` | Manages agent configurations |
+| `edgedelta_dashboard` | Manages dashboards |
 
 Further [usage documentation is available in the provider repo](docs/index.md).
 
