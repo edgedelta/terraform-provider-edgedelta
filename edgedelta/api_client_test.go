@@ -71,7 +71,9 @@ func TestGetDashboard(t *testing.T) {
 
 		// Return mock response
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(expectedDashboard)
+		if err := json.NewEncoder(w).Encode(expectedDashboard); err != nil {
+			t.Errorf("failed to encode response: %v", err)
+		}
 	})
 	defer server.Close()
 
@@ -145,7 +147,9 @@ func TestGetAllDashboards(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(expectedDashboards)
+		if err := json.NewEncoder(w).Encode(expectedDashboards); err != nil {
+			t.Errorf("failed to encode response: %v", err)
+		}
 	})
 	defer server.Close()
 
@@ -217,7 +221,9 @@ func TestCreateDashboard(t *testing.T) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		_ = json.NewEncoder(w).Encode(expectedResponse)
+		if err := json.NewEncoder(w).Encode(expectedResponse); err != nil {
+			t.Errorf("failed to encode response: %v", err)
+		}
 	})
 	defer server.Close()
 
@@ -442,7 +448,9 @@ func TestCreateConfig_Mock(t *testing.T) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(expectedResponse)
+		if err := json.NewEncoder(w).Encode(expectedResponse); err != nil {
+			t.Errorf("failed to encode response: %v", err)
+		}
 	})
 	defer server.Close()
 
