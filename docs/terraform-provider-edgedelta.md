@@ -244,7 +244,7 @@ terraform {
   required_providers {
     edgedelta = {
       source  = "edgedelta.com/local/edgedelta"
-      version = "0.0.9"   # If you've set TERRAFORM_PROVIDER_ED_VERSION=0.0.9
+      version = "0.0.10"   # If you've set TERRAFORM_PROVIDER_ED_VERSION=0.0.10
     }
   }
 }
