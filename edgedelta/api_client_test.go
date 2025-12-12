@@ -71,7 +71,7 @@ func TestGetDashboard(t *testing.T) {
 
 		// Return mock response
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(expectedDashboard)
+		_ = json.NewEncoder(w).Encode(expectedDashboard)
 	})
 	defer server.Close()
 
@@ -111,7 +111,7 @@ func TestGetDashboard_InvalidID(t *testing.T) {
 func TestGetDashboard_NotFound(t *testing.T) {
 	server := newMockServer(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte(`{"error": "dashboard not found"}`))
+		_, _ = w.Write([]byte(`{"error": "dashboard not found"}`))
 	})
 	defer server.Close()
 
@@ -145,7 +145,7 @@ func TestGetAllDashboards(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(expectedDashboards)
+		_ = json.NewEncoder(w).Encode(expectedDashboards)
 	})
 	defer server.Close()
 
@@ -166,7 +166,7 @@ func TestGetAllDashboards(t *testing.T) {
 func TestGetAllDashboards_Empty(t *testing.T) {
 	server := newMockServer(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`[]`))
+		_, _ = w.Write([]byte(`[]`))
 	})
 	defer server.Close()
 
@@ -217,7 +217,7 @@ func TestCreateDashboard(t *testing.T) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(expectedResponse)
+		_ = json.NewEncoder(w).Encode(expectedResponse)
 	})
 	defer server.Close()
 
@@ -328,7 +328,7 @@ func TestDeleteDashboard_InvalidID(t *testing.T) {
 func TestDeleteDashboard_NotFound(t *testing.T) {
 	server := newMockServer(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte(`{"error": "dashboard not found"}`))
+		_, _ = w.Write([]byte(`{"error": "dashboard not found"}`))
 	})
 	defer server.Close()
 

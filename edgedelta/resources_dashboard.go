@@ -42,7 +42,7 @@ func resourceDashboard() *schema.Resource {
 				Optional:         true,
 				DiffSuppressFunc: suppressEquivalentJSON,
 				ValidateFunc:     validateJSON,
-				Description:      "Dashboard definition as a JSON string. Use file() or jsonencode() to provide the value.",
+				Description:      "Full dashboard definition as a JSON string. Can include 'definition', 'resource_accesses', and 'sharing_security_settings' fields. Use file() to load from a JSON file.",
 			},
 
 			// Computed
@@ -128,11 +128,13 @@ func resourceDashboard() *schema.Resource {
 }
 
 type dashboardArgs struct {
-	dashboardName string
-	description   string
-	tags          []string
-	definition    map[string]interface{}
-	diags         diag.Diagnostics
+	dashboardName           string
+	description             string
+	tags                    []string
+	definition              map[string]interface{}
+	resourceAccesses        []map[string]interface{}
+	sharingSecuritySettings map[string]interface{}
+	diags                   diag.Diagnostics
 }
 
 func parseDashboardArgs(d *schema.ResourceData) *dashboardArgs {
@@ -160,7 +162,7 @@ func parseDashboardArgs(d *schema.ResourceData) *dashboardArgs {
 	if v, ok := d.GetOk("definition"); ok {
 		defStr := v.(string)
 		if defStr != "" {
-			def, err := stringToJSONMap(defStr)
+			fullDef, err := stringToJSONMap(defStr)
 			if err != nil {
 				args.diags = append(args.diags, diag.Diagnostic{
 					Severity: diag.Error,
@@ -168,7 +170,28 @@ func parseDashboardArgs(d *schema.ResourceData) *dashboardArgs {
 					Detail:   err.Error(),
 				})
 			} else {
-				args.definition = def
+				// Extract nested 'definition' if present, otherwise use the whole object as definition
+				if nestedDef, ok := fullDef["definition"].(map[string]interface{}); ok {
+					args.definition = nestedDef
+				} else {
+					// The JSON is the definition itself (no wrapper)
+					args.definition = fullDef
+				}
+
+				// Extract resource_accesses if present
+				if ra, ok := fullDef["resource_accesses"].([]interface{}); ok {
+					args.resourceAccesses = make([]map[string]interface{}, 0, len(ra))
+					for _, item := range ra {
+						if m, ok := item.(map[string]interface{}); ok {
+							args.resourceAccesses = append(args.resourceAccesses, m)
+						}
+					}
+				}
+
+				// Extract sharing_security_settings if present
+				if sss, ok := fullDef["sharing_security_settings"].(map[string]interface{}); ok {
+					args.sharingSecuritySettings = sss
+				}
 			}
 		}
 	}
@@ -191,8 +214,20 @@ func setDashboardState(d *schema.ResourceData, dash *Dashboard) error {
 			return err
 		}
 	}
-	if dash.Definition != nil {
-		defStr, err := jsonMapToString(dash.Definition)
+
+	// Combine definition, resource_accesses, and sharing_security_settings into a single JSON
+	if dash.Definition != nil || dash.ResourceAccesses != nil || dash.SharingSecuritySettings != nil {
+		combinedDef := make(map[string]interface{})
+		if dash.Definition != nil {
+			combinedDef["definition"] = dash.Definition
+		}
+		if dash.ResourceAccesses != nil {
+			combinedDef["resource_accesses"] = dash.ResourceAccesses
+		}
+		if dash.SharingSecuritySettings != nil {
+			combinedDef["sharing_security_settings"] = dash.SharingSecuritySettings
+		}
+		defStr, err := jsonMapToString(combinedDef)
 		if err != nil {
 			return err
 		}
@@ -200,6 +235,7 @@ func setDashboardState(d *schema.ResourceData, dash *Dashboard) error {
 			return err
 		}
 	}
+
 	if err := d.Set("creator", dash.Creator); err != nil {
 		return err
 	}
@@ -223,10 +259,12 @@ func resourceDashboardCreate(ctx context.Context, d *schema.ResourceData, m inte
 	}
 
 	dashboard := &Dashboard{
-		DashboardName: args.dashboardName,
-		Description:   args.description,
-		Tags:          args.tags,
-		Definition:    args.definition,
+		DashboardName:           args.dashboardName,
+		Description:             args.description,
+		Tags:                    args.tags,
+		Definition:              args.definition,
+		ResourceAccesses:        args.resourceAccesses,
+		SharingSecuritySettings: args.sharingSecuritySettings,
 	}
 
 	resp, err := meta.client.CreateDashboard(dashboard)
@@ -311,10 +349,12 @@ func resourceDashboardUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	}
 
 	dashboard := &Dashboard{
-		DashboardName: args.dashboardName,
-		Description:   args.description,
-		Tags:          args.tags,
-		Definition:    args.definition,
+		DashboardName:           args.dashboardName,
+		Description:             args.description,
+		Tags:                    args.tags,
+		Definition:              args.definition,
+		ResourceAccesses:        args.resourceAccesses,
+		SharingSecuritySettings: args.sharingSecuritySettings,
 	}
 
 	resp, err := meta.client.UpdateDashboard(dashboardID, dashboard)

@@ -32,7 +32,7 @@ func (cli *APIClient) initializeHTTPClient() {
 	t.MaxIdleConnsPerHost = 1
 
 	cli.cl = &http.Client{
-		Timeout:   10 * time.Second,
+		Timeout:   60 * time.Second,
 		Transport: t,
 	}
 }
