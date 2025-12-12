@@ -38,7 +38,9 @@ The current provider params are as follows:
 
 > Type: `map[string]*schema.Resource`
 
-The resources map provides a mapping of resource names and resource schemas. We currently have one resource, namely `edgedelta_config`, and the current resource map is as follows:
+The resources map provides a mapping of resource names and resource schemas. We currently have two resources: `edgedelta_config` and `edgedelta_dashboard`.
+
+##### edgedelta_config
 
 ```go
 map[string]*schema.Resource{
@@ -70,6 +72,61 @@ map[string]*schema.Resource{
 }
 ```
 
+##### edgedelta_dashboard
+
+```go
+map[string]*schema.Resource{
+    "edgedelta_dashboard": {
+        CreateContext: resourceDashboardCreate,
+        ReadContext:   resourceDashboardRead,
+        UpdateContext: resourceDashboardUpdate,
+        DeleteContext: resourceDashboardDelete,
+        Schema: map[string]*schema.Schema{
+            // Required params
+            "dashboard_name": {
+                Type:        schema.TypeString,
+                Required:    true,
+                Description: "Name of the dashboard",
+            },
+            // Optional params
+            "description": {
+                Type:        schema.TypeString,
+                Optional:    true,
+                Description: "Description of the dashboard",
+            },
+            "tags": {
+                Type:        schema.TypeList,
+                Optional:    true,
+                Elem:        &schema.Schema{Type: schema.TypeString},
+                Description: "Searchable tags for the dashboard",
+            },
+            "definition": {
+                Type:        schema.TypeString,
+                Optional:    true,
+                Description: "Full dashboard definition as JSON string",
+            },
+            // Computed
+            "dashboard_id": {
+                Type:     schema.TypeString,
+                Computed: true,
+            },
+            "creator": {
+                Type:     schema.TypeString,
+                Computed: true,
+            },
+            "created": {
+                Type:     schema.TypeString,
+                Computed: true,
+            },
+            "updated": {
+                Type:     schema.TypeString,
+                Computed: true,
+            },
+        },
+    },
+}
+```
+
 #### ConfigureContextFunc
 
 The context configuration function is used to initialize the metadata struct instance which is passed to the CRUD functions of the resources when the provider is invoked by Terraform CLI. The metadata struct holds the information used by every resource and CRUD function. The current metadata struct includes only an instance to `ConfigAPIClient` is as follows:
@@ -84,9 +141,11 @@ The metadata instance is initialized in the `providerConfigure` function in [edg
 
 ### Resource Struct
 
-The resource struct defines the parameters and CRUD functions of that particular resource. We currently have one resource, namely `edgedelta_config`, which is defined in [resources_config.go](../edgedelta/resources_config.go).
+The resource struct defines the parameters and CRUD functions of that particular resource. We currently have two resources:
+- `edgedelta_config` - defined in [resources_config.go](../edgedelta/resources_config.go)
+- `edgedelta_dashboard` - defined in [resources_dashboard.go](../edgedelta/resources_dashboard.go)
 
-Each resource instance has an additional `id` field, not defined explicitly in the resource struct, which is an unique identifier of the instance. In our implementation, we have used the `id` field to hold the configuration id data, as well as the `conf_id` param. This design choice is made to prevent the `conf_id` to be set to `nil` every time `terraform apply` is used with a resource with no explicit `conf_id`. The `id` then holds the real resource ID after the creation process to later use in the API calls.
+Each resource instance has an additional `id` field, not defined explicitly in the resource struct, which is an unique identifier of the instance. In our implementation, we have used the `id` field to hold the configuration/dashboard id data. The `id` holds the real resource ID after the creation process to later use in the API calls.
 
 #### Schema
 
@@ -137,13 +196,27 @@ type APIClient struct {
 
 The `OrgID`, `APIBaseURL` and `apiSecret` params should be passed in instantiation, then the `initializeHTTPClient` function should be called to initialize the http client `cl`.
 
-The client has a number of functions, the detailed function information can be found in the table below:
+The client has a number of functions, the detailed function information can be found in the tables below:
+
+##### Config API Functions
 
 |Name|API Resource Tag|Params|Return Value|
 |-|-|-|-|
 |GetConfigWithID|`confs`|**configID**: `string`|[*GetConfigResponse](../edgedelta/types.go)|
+|GetAllConfigs|`confs`|none|[\[\]*Config](../edgedelta/types.go)|
 |CreateConfig|`confs`|**configObject**: [Config](../edgedelta/types.go)|[*CreateConfigResponse](../edgedelta/types.go)|
 |UpdateConfigWithID|`confs`|**configID**: `string` <br><br>  **configObject**: [Config](../edgedelta/types.go)|[*UpdateConfigResponse](../edgedelta/types.go)|
+|DeleteConfigWithID|`confs`|**configID**: `string`|error|
+
+##### Dashboard API Functions
+
+|Name|API Resource Tag|Params|Return Value|
+|-|-|-|-|
+|GetDashboard|`dashboards`|**dashboardID**: `string`|[*GetDashboardResponse](../edgedelta/types.go)|
+|GetAllDashboards|`dashboards`|none|[\[\]*Dashboard](../edgedelta/types.go)|
+|CreateDashboard|`dashboards`|**dashboard**: [*Dashboard](../edgedelta/types.go)|[*CreateDashboardResponse](../edgedelta/types.go)|
+|UpdateDashboard|`dashboards`|**dashboardID**: `string` <br><br>  **dashboard**: [*Dashboard](../edgedelta/types.go)|[*UpdateDashboardResponse](../edgedelta/types.go)|
+|DeleteDashboard|`dashboards`|**dashboardID**: `string`|error|
 
 ## Running the Provider Locally
 

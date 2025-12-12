@@ -31,7 +31,8 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"edgedelta_config": resourceConfig(),
+			"edgedelta_config":    resourceConfig(),
+			"edgedelta_dashboard": resourceDashboard(),
 		},
 		DataSourcesMap:       map[string]*schema.Resource{},
 		ConfigureContextFunc: providerConfigure,

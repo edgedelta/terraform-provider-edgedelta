@@ -65,3 +65,24 @@ type ConfigHistory struct {
 	Content   string `json:"content"`
 	Status    string `json:"status"`
 }
+
+// Dashboard represents an EdgeDelta dashboard
+type Dashboard struct {
+	OrgID                   string                   `json:"org_id,omitempty"`
+	DashboardID             string                   `json:"dashboard_id,omitempty"`
+	DashboardName           string                   `json:"dashboard_name"`
+	Description             string                   `json:"description,omitempty"`
+	Tags                    []string                 `json:"tags,omitempty"`
+	Creator                 string                   `json:"creator,omitempty"`
+	Updater                 string                   `json:"updater,omitempty"`
+	Created                 string                   `json:"created,omitempty"`
+	Updated                 string                   `json:"updated,omitempty"`
+	Definition              map[string]interface{}   `json:"definition,omitempty"`
+	ResourceAccesses        []map[string]interface{} `json:"resource_accesses,omitempty"`
+	SharingSecuritySettings map[string]interface{}   `json:"sharing_security_settings,omitempty"`
+}
+
+// Dashboard API response types
+type GetDashboardResponse Dashboard
+type CreateDashboardResponse Dashboard
+type UpdateDashboardResponse Dashboard
