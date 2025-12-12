@@ -259,7 +259,9 @@ func TestUpdateDashboard(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(expectedResponse)
+		if err := json.NewEncoder(w).Encode(expectedResponse); err != nil {
+			t.Errorf("failed to encode response: %v", err)
+		}
 	})
 	defer server.Close()
 
@@ -362,7 +364,9 @@ func TestGetConfigWithID_Mock(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(expectedConfig)
+		if err := json.NewEncoder(w).Encode(expectedConfig); err != nil {
+			t.Errorf("failed to encode response: %v", err)
+		}
 	})
 	defer server.Close()
 
@@ -402,7 +406,9 @@ func TestGetAllConfigs_Mock(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(expectedConfigs)
+		if err := json.NewEncoder(w).Encode(expectedConfigs); err != nil {
+			t.Errorf("failed to encode response: %v", err)
+		}
 	})
 	defer server.Close()
 
@@ -458,14 +464,15 @@ func TestDeleteConfigWithID_Mock(t *testing.T) {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{}`))
+		_, err := w.Write([]byte(`{}`))
+		if err != nil {
+			t.Errorf("failed to write response: %v", err)
+		}
 	})
 	defer server.Close()
 
 	client := newTestClient(server.URL)
-	err := client.DeleteConfigWithID(testConfigID)
-
-	if err != nil {
+	if err := client.DeleteConfigWithID(testConfigID); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }

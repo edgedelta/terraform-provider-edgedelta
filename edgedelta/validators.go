@@ -89,31 +89,3 @@ func stringToJSONMap(s string) (map[string]interface{}, error) {
 	}
 	return result, nil
 }
-
-// stringToJSONArray converts a JSON string to []map[string]interface{}
-func stringToJSONArray(s string) ([]map[string]interface{}, error) {
-	if s == "" {
-		return nil, nil
-	}
-	s = strings.TrimSpace(s)
-	if s == "" {
-		return nil, nil
-	}
-	var result []map[string]interface{}
-	if err := json.Unmarshal([]byte(s), &result); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal JSON array: %v", err)
-	}
-	return result, nil
-}
-
-// jsonArrayToString converts a []map[string]interface{} to a JSON string
-func jsonArrayToString(arr []map[string]interface{}) (string, error) {
-	if arr == nil {
-		return "", nil
-	}
-	b, err := json.Marshal(arr)
-	if err != nil {
-		return "", fmt.Errorf("failed to marshal array to JSON: %v", err)
-	}
-	return string(b), nil
-}
